@@ -5,3 +5,4 @@ metadata:
 spec:
   user-id: user42
   match-path: /k8s/api/v1/
+
