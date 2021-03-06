@@ -1,0 +1,7 @@
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateToken
+metadata:
+  name: gatetoken-sample
+spec:
+  # Add fields here
+  foo: bar

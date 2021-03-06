@@ -1,0 +1,13 @@
+domain: yaacov.com
+layout: go.kubebuilder.io/v3
+projectName: oc-gate-operator
+repo: github.com/yaacov/oc-gate-operator
+resources:
+- crdVersion: v1
+  group: ocgate
+  kind: GateToken
+  version: v1beta1
+version: 3-alpha
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}

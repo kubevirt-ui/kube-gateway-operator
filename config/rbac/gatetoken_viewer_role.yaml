@@ -1,0 +1,20 @@
+# permissions for end users to view gatetokens.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gatetoken-viewer-role
+rules:
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gatetokens
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gatetokens/status
+  verbs:
+  - get

@@ -1,0 +1,24 @@
+# permissions for end users to edit gatetokens.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gatetoken-editor-role
+rules:
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gatetokens
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gatetokens/status
+  verbs:
+  - get
