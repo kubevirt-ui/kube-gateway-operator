@@ -78,7 +78,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// If token was created, exit.
 	if token.Status.Phase != "" {
-		r.Log.Info("stale token", "id", token.Name)
+		r.Log.Info("Old token", "id", token.Name)
 		return ctrl.Result{}, nil
 	}
 
