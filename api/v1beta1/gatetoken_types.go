@@ -73,7 +73,7 @@ type GateTokenSpec struct {
 	// +kubebuilder:default:=3600
 	DurationSec int64 `json:"duration-sec"`
 
-	// match-path is a comma seperated list of allowed http methods,
+	// match-path is a comma separated list of allowed http methods,
 	// only API requests matching one of the allowed methods will be validated.
 	// Defalut value is "GET,OPTIONS".
 	// +kubebuilder:validation:Optional
