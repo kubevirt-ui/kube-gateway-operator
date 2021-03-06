@@ -95,7 +95,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Get private key secret
-	key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", "oc-gate")
+	key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", token.Namespace)
 	if err != nil {
 		r.Log.Info("Can't read private key secret", "err", err)
 
