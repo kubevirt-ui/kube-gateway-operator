@@ -51,7 +51,7 @@ spec:
                 type: string
               match-method:
                 default: GET,OPTIONS
-                description: match-path is a comma seperated list of allowed http
+                description: match-path is a comma separated list of allowed http
                   methods, only API requests matching one of the allowed methods will
                   be validated. Defalut value is "GET,OPTIONS".
                 maxLength: 1024
@@ -62,7 +62,7 @@ spec:
                   request path, API requests matching this pattern will be validated
                   by the token. This field may not be empty.
                 maxLength: 1024
-                pattern: ^/[^:@]+$
+                pattern: ^[/^][^:@]+$
                 type: string
               user-id:
                 description: User is the user id of the user requesting this token.

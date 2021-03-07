@@ -40,7 +40,7 @@ type GateTokenSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// User is the user id of the user requesting this token.
+	// user-id is the user id of the user requesting this token.
 	// +required
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type="string"
