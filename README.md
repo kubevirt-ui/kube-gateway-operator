@@ -7,6 +7,23 @@ creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
 [![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+## Install
+
+Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
+
+```bash
+# Create a namespace
+oc project default
+
+# Install
+operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1 -n oc-gate-operator
+
+# Un-Install
+operator-sdk cleanup oc-gate-operator
+```
+
+## Usage
+
 Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD,
 
 Available fields are:
