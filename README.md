@@ -12,7 +12,7 @@ creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
 Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 
 ```bash
-# Create a namespace
+# Use default namespace
 oc project default
 
 # Install
