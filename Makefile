@@ -133,4 +133,4 @@ bundle: manifests kustomize
 # Build the bundle image.
 .PHONY: bundle-build
 bundle-build:
-	podman build -f bundle.podmanfile -t $(BUNDLE_IMG) .
+	podman build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
