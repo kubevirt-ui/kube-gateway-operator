@@ -29,7 +29,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: controller:latest
+        image: quay.io/yaacov/oc-gate-operator:v0.0.1
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
