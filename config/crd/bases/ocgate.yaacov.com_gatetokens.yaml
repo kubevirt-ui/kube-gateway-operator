@@ -65,7 +65,7 @@ spec:
                 pattern: ^[/^][^:@]+$
                 type: string
               user-id:
-                description: User is the user id of the user requesting this token.
+                description: user-id is the user id of the user requesting this token.
                 maxLength: 226
                 type: string
             required:
