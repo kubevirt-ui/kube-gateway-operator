@@ -53,7 +53,7 @@ type GateTokenSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^/[^:@]+$"
+	// +kubebuilder:validation:Pattern="^[/^][^:@]+$"
 	// +kubebuilder:validation:MaxLength=1024
 	MatchPath string `json:"match-path"`
 
