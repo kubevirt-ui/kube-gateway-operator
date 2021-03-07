@@ -16,7 +16,7 @@ Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/
 oc project default
 
 # Install
-operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1 -n oc-gate-operator
+operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1
 
 # Un-Install
 operator-sdk cleanup oc-gate-operator
