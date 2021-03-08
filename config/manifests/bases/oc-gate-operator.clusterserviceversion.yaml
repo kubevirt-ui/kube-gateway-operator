@@ -38,8 +38,10 @@ spec:
   - k8s
   - access
   links:
+  - name: Oc Gate Service
+    url: https://github.com/yaacov/oc-gate
   - name: Oc Gate Operator
-    url: https://oc-gate-operator.domain
+    url: https://github.com/yaacov/oc-gate-operator
   maturity: alpha
   provider:
     name: yaacov.com
