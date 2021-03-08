@@ -71,13 +71,13 @@ export USERNAME=yaacov
 make undeploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
 ```
 
-## Usage
+## Create GateToken CR
 
 Requires a secret with private key on 'oc-gate' namespace:
 
 ```bash
 # Use the oc-gate namespace
-oc priject oc-gate
+oc project oc-gate
 
 # create a secret
 oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem

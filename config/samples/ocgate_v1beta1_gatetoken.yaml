@@ -4,5 +4,5 @@ metadata:
   name: gatetoken-sample
 spec:
   user-id: user42
-  match-path: /k8s/api/v1/
+  match-path: ^/k8s/api/v1/
 
