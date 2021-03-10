@@ -4,6 +4,9 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
+    categories: OpenShift Optional
+    certified: "false"
+    containerImage: quay.io/yaacov/oc-gate-operator:v0.0.1
   name: oc-gate-operator.v0.0.0
   namespace: placeholder
 spec:
