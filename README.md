@@ -15,9 +15,6 @@ Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/
 # Use oc-gate namespace
 oc project oc-gate
 
-# Add privileged security context to the user running the operator
-oc adm policy add-scc-to-user privileged -z default -n oc-gate
-
 # Add the private key secret used to generate tokens
 oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 
