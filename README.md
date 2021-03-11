@@ -43,7 +43,31 @@ Get a token:
 
 [![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
 
-## Deploy
+## Example GateToken CR
+
+```yaml
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateToken
+metadata:
+  name: gatetoken-sample
+  namespace: oc-gate
+spec:
+  match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
+```
+
+## Example GateServer CR
+
+```yaml
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateServer
+metadata:
+  name: gateserver-sample
+  namespace: oc-gate
+spec:
+  route: test-proxy.apps.ostest.test.metalkube.org
+```
+
+## Customize deploy
 
 Requires
 
@@ -60,23 +84,5 @@ make deploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
 # Remove deployment of the operator, RBAC roles and CRDs
 export USERNAME=yaacov
 make undeploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
-```
-
-## Create GateToken CR
-
-Requires a secret with private key on 'oc-gate' namespace:
-
-```bash
-# Use the oc-gate namespace
-oc project oc-gate
-
-# create a secret
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
-
-# create a token request
-oc create -f config/samples/ocgate_v1beta1_gatetoken.yaml
-
-# check the token
-oc get gatetoken gatetoken-sample -o yaml
 ```
 
