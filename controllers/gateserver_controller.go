@@ -51,13 +51,19 @@ type GateServerReconciler struct {
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="route.openshift.io",resources=routes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="",resources=serviceaccount,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=role,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="apps",resources=deployment,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="route.openshift.io",resources=routes/custom-host,verbs=create;patch
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/finalizers,verbs=update
+
+// In order to grant client users access to resource, the operator it'slef need this access.
+// Note: to create a new gate server with admin role, the role of this operator need to be adjusted.
+// +kubebuilder:rbac:groups="*",resources="*",verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
