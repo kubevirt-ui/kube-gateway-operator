@@ -40,13 +40,6 @@ type GateTokenSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// user-id is the user id of the user requesting this token.
-	// +required
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:MaxLength=226
-	UserID string `json:"user-id"`
-
 	// match-path is a regular expresion used to validate API request path,
 	// API requests matching this pattern will be validated by the token.
 	// This field may not be empty.

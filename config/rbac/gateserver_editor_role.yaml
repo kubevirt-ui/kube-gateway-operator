@@ -1,0 +1,24 @@
+# permissions for end users to edit gateservers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gateserver-editor-role
+rules:
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gateservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gateservers/status
+  verbs:
+  - get

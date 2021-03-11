@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: gatetokens.ocgate.yaacov.com
+  name: gateservers.ocgate.yaacov.com
 spec:
   group: ocgate.yaacov.com
   names:
-    kind: GateToken
-    listKind: GateTokenList
-    plural: gatetokens
-    singular: gatetoken
+    kind: GateServer
+    listKind: GateServerList
+    plural: gateservers
+    singular: gateserver
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: GateToken is the Schema for the gatetokens API
+        description: GateServer is the Schema for the gateservers API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,41 +34,45 @@ spec:
           metadata:
             type: object
           spec:
-            description: GateTokenSpec defines the desired state of GateToken
+            description: GateServerSpec defines the desired state of GateServer
             properties:
-              duration-sec:
-                default: 3600
-                description: duration-sec is the duration in sec the token will be
-                  validated since it's invocation. Defalut value is 3600s (1h).
-                format: int64
-                minimum: 0
-                type: integer
-              from:
-                description: from is time of token invocation, the token will not
-                  validate before this time, the token duration will start from this
-                  time. Defalut to token object creation time.
-                format: date-time
-                type: string
-              match-method:
-                default: GET,OPTIONS
-                description: match-path is a comma separated list of allowed http
-                  methods, only API requests matching one of the allowed methods will
-                  be validated. Defalut value is "GET,OPTIONS".
+              admin-resources:
+                default: ""
+                description: admin-resources is a comma seperated list of resources
+                  athorization role of the service if left empty service could access
+                  any resource. Defalut value is "".
                 maxLength: 1024
-                pattern: ^(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+(,(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+)*$
                 type: string
-              match-path:
-                description: match-path is a regular expresion used to validate API
-                  request path, API requests matching this pattern will be validated
-                  by the token. This field may not be empty.
+              admin-role:
+                default: reader
+                description: admin-role is the verbs athorization role of the service
+                  (reader/admin) if service is role is reader, clients getting tokens
+                  to use this service will be able to excute get, watch and list verbs.
+                  if service is role is admin, clients getting tokens to use this
+                  service will be able to excute get, watch, list, patch, creat and
+                  delete verbs. Defalut value is "reader".
                 maxLength: 1024
-                pattern: ^[/^][^:@]+$
+                pattern: ^(reader|admin)$
                 type: string
-            required:
-            - match-path
+              api-url:
+                default: https://kubernetes.default.svc
+                description: api-url is the k8s API url. Defalut value is "https://kubernetes.default.svc".
+                maxLength: 1024
+                pattern: ^(http|https)://.*
+                type: string
+              passthrough:
+                default: false
+                description: passthrough the tokens aquired from OAuth2 server directly
+                  to k8s API
+                type: boolean
+              route:
+                description: route for the gate proxy server.
+                maxLength: 226
+                pattern: ^([a-z0-9-_])+[.]([a-z0-9-_])+[.]([a-z0-9-._])+$
+                type: string
             type: object
           status:
-            description: GateTokenStatus defines the observed state of GateToken
+            description: GateServerStatus defines the observed state of GateServer
             properties:
               conditions:
                 description: Conditions represent the latest available observations
@@ -141,49 +145,12 @@ spec:
                   - type
                   type: object
                 type: array
-              data:
-                description: Cached data, once created, user can not change this valuse
-                properties:
-                  alg:
-                    type: string
-                  duration-sec:
-                    format: int64
-                    type: integer
-                  exp:
-                    format: int64
-                    type: integer
-                  from:
-                    type: string
-                  matchMethod:
-                    type: string
-                  matchPath:
-                    type: string
-                  nbf:
-                    format: int64
-                    type: integer
-                  until:
-                    type: string
-                required:
-                - alg
-                - duration-sec
-                - exp
-                - from
-                - matchMethod
-                - matchPath
-                - nbf
-                - until
-                type: object
               phase:
                 description: Token generation phase (ready|error)
                 type: string
-              token:
-                description: The generated token
-                type: string
             required:
             - conditions
-            - data
             - phase
-            - token
             type: object
         type: object
     served: true

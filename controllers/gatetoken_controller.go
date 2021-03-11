@@ -43,6 +43,7 @@ type GateTokenReconciler struct {
 }
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens,verbs=get;list;watch;create;delete
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/finalizers,verbs=update

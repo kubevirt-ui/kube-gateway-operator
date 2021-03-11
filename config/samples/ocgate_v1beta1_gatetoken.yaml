@@ -2,7 +2,7 @@ apiVersion: ocgate.yaacov.com/v1beta1
 kind: GateToken
 metadata:
   name: gatetoken-sample
+  namespace: oc-gate
 spec:
-  user-id: user42
-  match-path: ^/k8s/api/v1/
+  match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
 

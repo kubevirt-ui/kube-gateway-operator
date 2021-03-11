@@ -31,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	routev1 "github.com/openshift/api/route/v1"
+
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 	"github.com/yaacov/oc-gate-operator/controllers"
 	// +kubebuilder:scaffold:imports
@@ -44,6 +46,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(routev1.AddToScheme(scheme))
 	utilruntime.Must(ocgatev1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
@@ -84,6 +87,14 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GateToken")
+		os.Exit(1)
+	}
+	if err = (&controllers.GateServerReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("GateServer"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "GateServer")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

@@ -17,6 +17,32 @@ rules:
 - apiGroups:
   - ocgate.yaacov.com
   resources:
+  - gateservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gateservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
+  - gateservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ocgate.yaacov.com
+  resources:
   - gatetokens
   verbs:
   - create
@@ -38,3 +64,11 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - privileged
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use

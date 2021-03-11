@@ -13,6 +13,11 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
+    - description: GateServer is the Schema for the gateservers API
+      displayName: Gate Server
+      kind: GateServer
+      name: gateservers.ocgate.yaacov.com
+      version: v1beta1
     - description: GateToken is the Schema for the gatetokens API
       displayName: Gate Token
       kind: GateToken

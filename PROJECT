@@ -7,6 +7,10 @@ resources:
   group: ocgate
   kind: GateToken
   version: v1beta1
+- crdVersion: v1
+  group: ocgate
+  kind: GateServer
+  version: v1beta1
 version: 3-alpha
 plugins:
   manifests.sdk.operatorframework.io/v2: {}

@@ -1,0 +1,7 @@
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateServer
+metadata:
+  name: gateserver-sample
+  namespace: oc-gate
+spec:
+  route: test-proxy.apps.ostest.test.metalkube.org
