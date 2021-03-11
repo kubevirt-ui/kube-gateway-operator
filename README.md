@@ -7,6 +7,8 @@ creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
 [![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+(gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
+
 ## Install
 
 ``` bash
@@ -40,12 +42,6 @@ Creating a token requires a secret holding a RSA private-key for sighing the tok
 Get a token:
 
 [![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
-
-Deploy:
-
-[![asciicast](https://asciinema.org/a/397137.svg)](https://asciinema.org/a/397137)
-
-(gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
 
 ## Deploy
 
