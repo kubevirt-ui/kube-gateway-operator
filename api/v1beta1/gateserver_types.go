@@ -58,7 +58,7 @@ type GateServerSpec struct {
 	// +kubebuilder:default:="reader"
 	AdminRole string `json:"admin-role,omitempty"`
 
-	// admin-resources is a comma seperated list of resources athorization role of the service
+	// admin-resources is a comma separated list of resources athorization role of the service,
 	// if left empty service could access any resource.
 	// Defalut value is "".
 	// +kubebuilder:validation:Optional
@@ -67,15 +67,15 @@ type GateServerSpec struct {
 	// +kubebuilder:default:=""
 	AdminResources string `json:"admin-resources,omitempty"`
 
-	// passthrough the tokens aquired from OAuth2 server directly to k8s API
+	// passthrough the tokens acquired from OAuth2 server directly to k8s API.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
 	PassThrough bool `json:"passthrough,omitempty"`
 
-	// image is the oc gate proxy image to use
-	// Defalut value is "quay.io/yaacov/oc-gate:latest"
+	// image is the oc gate proxy image to use.
+	// Defalut value is "quay.io/yaacov/oc-gate:latest".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024

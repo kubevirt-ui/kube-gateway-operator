@@ -133,19 +133,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create service.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "ServiceCreated",
-			Status:             "False",
-			Reason:             "FailedCreateService",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateService", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 
@@ -154,19 +145,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create route.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RouteCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRoute",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateRoute", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 
@@ -176,19 +158,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create serviceaccount.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "ServiceaccountCreated",
-			Status:             "False",
-			Reason:             "FailedCreateServiceaccount",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateServiceaccount", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 	role, _ := r.role(gateserver)
@@ -196,19 +169,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create role.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RoleCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRole",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateRole", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 	rolebinding, _ := r.rolebinding(gateserver)
@@ -216,19 +180,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create rolebinding.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RolebindingCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRolebinding",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateRolebinding", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 
@@ -238,19 +193,10 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err != nil {
 		r.Log.Info("Failed to create deployment.", "err", err)
 
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "DeploymentCreated",
-			Status:             "False",
-			Reason:             "FailedCreateDeployment",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		setServerCondition(gateserver, "FailedCreateDeployment", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-
 		return ctrl.Result{}, nil
 	}
 
@@ -295,6 +241,19 @@ func (r *GateServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ocgatev1beta1.GateServer{}).
 		Complete(r)
+}
+
+func setServerCondition(s *ocgatev1beta1.GateServer, reason string, err error) {
+	t := metav1.Time{Time: time.Now()}
+	s.Status.Phase = "Error"
+	condition := metav1.Condition{
+		Type:               "Error",
+		Status:             "True",
+		Reason:             reason,
+		Message:            fmt.Sprintf("%s", err),
+		LastTransitionTime: t,
+	}
+	s.Status.Conditions = []metav1.Condition{condition}
 }
 
 func (r *GateServerReconciler) service(s *ocgatev1beta1.GateServer) (*corev1.Service, error) {
