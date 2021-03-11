@@ -124,83 +124,17 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, nil
 	}
 
-	// Take time
-	t := metav1.Time{Time: time.Now()}
-
-	// Create the service and route
-	se, _ := r.service(gateserver)
-	err = r.Client.Create(ctx, se)
+	// Create the server
+	err = r.buildServer(ctx, gateserver)
 	if err != nil {
-		r.Log.Info("Failed to create service.", "err", err)
+		r.Log.Info("Failed to create oc gate proxy.", "err", err)
 
-		setServerCondition(gateserver, "FailedCreateService", err)
+		setServerCondition(gateserver, "FailedCreateServer", err)
 		if err := r.Status().Update(ctx, gateserver); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
 	}
-
-	route, _ := r.route(gateserver)
-	err = r.Client.Create(ctx, route)
-	if err != nil {
-		r.Log.Info("Failed to create route.", "err", err)
-
-		setServerCondition(gateserver, "FailedCreateRoute", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-		return ctrl.Result{}, nil
-	}
-
-	// Create the service account and roles
-	sa, _ := r.serviceaccount(gateserver)
-	err = r.Client.Create(ctx, sa)
-	if err != nil {
-		r.Log.Info("Failed to create serviceaccount.", "err", err)
-
-		setServerCondition(gateserver, "FailedCreateServiceaccount", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-		return ctrl.Result{}, nil
-	}
-	role, _ := r.role(gateserver)
-	err = r.Client.Create(ctx, role)
-	if err != nil {
-		r.Log.Info("Failed to create role.", "err", err)
-
-		setServerCondition(gateserver, "FailedCreateRole", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-		return ctrl.Result{}, nil
-	}
-	rolebinding, _ := r.rolebinding(gateserver)
-	err = r.Client.Create(ctx, rolebinding)
-	if err != nil {
-		r.Log.Info("Failed to create rolebinding.", "err", err)
-
-		setServerCondition(gateserver, "FailedCreateRolebinding", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-		return ctrl.Result{}, nil
-	}
-
-	// Create the gate service
-	dep, _ := r.deployment(gateserver)
-	err = r.Client.Create(ctx, dep)
-	if err != nil {
-		r.Log.Info("Failed to create deployment.", "err", err)
-
-		setServerCondition(gateserver, "FailedCreateDeployment", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-		return ctrl.Result{}, nil
-	}
-
-	// Create service and route
 
 	// Add finalizer for this CR
 	if !controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {
@@ -211,6 +145,8 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 	}
 
+	// Set status to Ready
+	t := metav1.Time{Time: time.Now()}
 	gateserver.Status.Phase = "Ready"
 	condition := metav1.Condition{
 		Type:               "Created",
@@ -495,4 +431,45 @@ func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.
 	controllerutil.SetControllerReference(s, deployment, r.Scheme)
 
 	return deployment, nil
+}
+
+func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1.GateServer) error {
+	// Create the service and route
+	se, _ := r.service(s)
+	err := r.Client.Create(ctx, se)
+	if err != nil {
+		return err
+	}
+
+	route, _ := r.route(s)
+	err = r.Client.Create(ctx, route)
+	if err != nil {
+		return err
+	}
+
+	// Create the service account and roles
+	sa, _ := r.serviceaccount(s)
+	err = r.Client.Create(ctx, sa)
+	if err != nil {
+		return err
+	}
+	role, _ := r.role(s)
+	err = r.Client.Create(ctx, role)
+	if err != nil {
+		return err
+	}
+	rolebinding, _ := r.rolebinding(s)
+	err = r.Client.Create(ctx, rolebinding)
+	if err != nil {
+		return err
+	}
+
+	// Create the gate service
+	dep, _ := r.deployment(s)
+	err = r.Client.Create(ctx, dep)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
