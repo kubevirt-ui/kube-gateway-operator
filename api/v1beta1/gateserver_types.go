@@ -73,6 +73,14 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
 	PassThrough bool `json:"passthrough,omitempty"`
+
+	// image is the oc gate proxy image to use
+	// Defalut value is "quay.io/yaacov/oc-gate:latest"
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:MaxLength=1024
+	// +kubebuilder:default:="quay.io/yaacov/oc-gate:latest"
+	Image string `json:"image,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer

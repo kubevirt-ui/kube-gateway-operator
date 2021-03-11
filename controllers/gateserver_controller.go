@@ -446,7 +446,6 @@ func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1
 }
 
 func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
-	image := "quay.io/yaacov/oc-gate:latest"
 	replicas := int32(1)
 	labels := map[string]string{
 		"app": s.Name,
@@ -472,7 +471,7 @@ func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image: image,
+						Image: s.Spec.Image,
 						Name:  "oc-gate",
 
 						Ports: []corev1.ContainerPort{{
