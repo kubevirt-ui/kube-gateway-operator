@@ -24,31 +24,12 @@ oc create -f deploy
 #oc delete -f deploy
 ```
 
-## Install with operator-sdk
-
-Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
-
-```bash
-# Use oc-gate namespace
-oc project oc-gate
-
-# Add the private key secret used to generate tokens
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
-
-# Install the operator
-operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1 -n oc-gate
-
-# Un-Install
-operator-sdk cleanup oc-gate-operator
-```
-
 ## Usage
 
 Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD,
 
 Available fields are:
 
-- user-id: string (required), user-id is the user id of the user requesting this token.
 - match-path: string (required), match-path is a regular expresion used to validate API request path, API requests matching this pattern will be validated by the token. This field may not be empty.
 - match-method: string, a comma separeted list of allowed http methods, defoult is "GET,OPTIONS"
 - duration-sec: int, duration-sec is the duration in sec the token will be validated since it's invocation. Defalut value is 3600s (1h).
@@ -103,23 +84,3 @@ oc create -f config/samples/ocgate_v1beta1_gatetoken.yaml
 oc get gatetoken gatetoken-sample -o yaml
 ```
 
-## Build
-
-```bash
-# Compile operator
-make
-
-# Install CRD on cluser for running loaclly
-make install
-# make uninstall
-
-# Run locally
-make run
-```
-
-## Build images
-
-```bash
-export USERNAME=yaacov
-make podman-build podman-push IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
-```
