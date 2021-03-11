@@ -32,7 +32,7 @@ spec:
             properties:
               admin-resources:
                 default: ""
-                description: admin-resources is a comma seperated list of resources athorization role of the service if left empty service could access any resource. Defalut value is "".
+                description: admin-resources is a comma separated list of resources athorization role of the service, if left empty service could access any resource. Defalut value is "".
                 maxLength: 1024
                 type: string
               admin-role:
@@ -49,12 +49,12 @@ spec:
                 type: string
               image:
                 default: quay.io/yaacov/oc-gate:latest
-                description: image is the oc gate proxy image to use Defalut value is "quay.io/yaacov/oc-gate:latest"
+                description: image is the oc gate proxy image to use. Defalut value is "quay.io/yaacov/oc-gate:latest".
                 maxLength: 1024
                 type: string
               passthrough:
                 default: false
-                description: passthrough the tokens aquired from OAuth2 server directly to k8s API
+                description: passthrough the tokens acquired from OAuth2 server directly to k8s API.
                 type: boolean
               route:
                 description: route for the gate proxy server.
