@@ -9,6 +9,23 @@ creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
 
 ## Install
 
+``` bash
+# Clone repository
+git clone git@github.com:yaacov/oc-gate-operator.git
+cd oc-gate-operator
+
+# Add the private/public key secret used to generate tokens
+oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
+
+# Deoploy
+oc new-project oc-gate-operator-system
+oc create -f deploy
+
+#oc delete -f deploy
+```
+
+## Install with operator-sdk
+
 Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 
 ```bash
