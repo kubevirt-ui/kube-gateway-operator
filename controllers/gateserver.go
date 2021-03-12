@@ -241,13 +241,15 @@ func (r *GateServerReconciler) clusterrolebinding(s *ocgatev1beta1.GateServer) (
 
 	rolebinding := &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   s.Name,
-			Labels: labels,
+			Name:      s.Name,
+			Namespace: s.Namespace,
+			Labels:    labels,
 		},
 		Subjects: []rbacv1.Subject{
 			{
-				Kind: "ServiceAccount",
-				Name: s.Name,
+				Kind:      "ServiceAccount",
+				Namespace: s.Namespace,
+				Name:      s.Name,
 			},
 		},
 		RoleRef: rbacv1.RoleRef{

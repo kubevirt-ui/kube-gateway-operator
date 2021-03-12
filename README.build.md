@@ -34,5 +34,5 @@ make bundle-build
 ## Push Bundle
 
 ```bash
-podman push 
+podman push quay.io/yaacov/oc-gate-operator-bundle:v0.0.1
 ```
