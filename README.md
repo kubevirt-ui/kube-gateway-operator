@@ -20,11 +20,14 @@ Once installed the operator manages two custom resources:
 ## Deploy
 
 ``` bash
-# Deoploy
-oc create -f deploy
+# Deoploy.
+oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
 
-# Create namespace and add the private/public key secret used to generate tokens
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
+# Create private/public key pair secret used to generate and autheticate tokens.
+openssl genrsa -out key.pem
+openssl req -new -x509 -sha256 -key key.pem -out cert.pem -days 3650
+
+oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=cert.pem --from-file=key.pem
 ```
 
 ### Disconnected clusters
@@ -42,7 +45,7 @@ vim deploy/apps_v1_deployment_oc-gate-operator-controller-manager.yaml
 
 ```bash
 # Un-Deploy
-oc delete -f deploy
+oc delete -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
 ```
 
 ## Usage
