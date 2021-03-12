@@ -32,7 +32,7 @@ spec:
             properties:
               admin-namespaced:
                 default: false
-                description: admin-namespaced determain if the athorization role of the service is namespaced.
+                description: admin-namespaced determain if the athorization role of the service is namespaced. Defalut value is false.
                 type: boolean
               admin-resources:
                 default: ""
@@ -58,10 +58,10 @@ spec:
                 type: string
               passthrough:
                 default: false
-                description: passthrough the tokens acquired from OAuth2 server directly to k8s API.
+                description: passthrough determain if the tokens acquired from OAuth2 server directly to k8s API. Defalut value is false.
                 type: boolean
               route:
-                description: route for the gate proxy server.
+                description: route is the the gate proxy server.
                 maxLength: 226
                 pattern: ^([a-z0-9-_])+[.]([a-z0-9-_])+[.]([a-z0-9-._])+$
                 type: string
