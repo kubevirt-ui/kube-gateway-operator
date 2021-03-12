@@ -79,6 +79,8 @@ Creating a token requires a secret holding a RSA private-key for sighing the tok
 
 Note: the token signiture requires a secret holding the private key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
 
+This example will generate a token that will give it's holder access to API calls matching the path "/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc" for 1 hour.
+
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
 kind: GateToken
@@ -92,6 +94,8 @@ spec:
 ## Example GateServer CR
 
 Note: the server signiture authentication requires a secret holding the public key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
+
+This example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org".
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
