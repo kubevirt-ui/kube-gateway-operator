@@ -2,7 +2,7 @@
 
 ![alt gopher network](https://raw.githubusercontent.com/yaacov/oc-gate/main/web/public/network-side.png)
 
-Operate the [oc-gate](https://github.com/yaacov/oc-gate) service on a cluster.
+Operate the [oc-gate](https://github.com/yaacov/oc-gate) service and access tokens on a cluster.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
