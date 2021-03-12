@@ -7,6 +7,14 @@ Operate the [oc-gate](https://github.com/yaacov/oc-gate) service on a cluster.
 [![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+oc-gate service allow k8s users to allow none-k8s users access to single k8s resource for a limited time.
+It uses signed, expiring JWTs to grant non k8s users access.
+
+Once installed the operator manages two custom resources:
+
+- [GateServer](#example_gateserver_cr): louches the oc-gate service that proxy k8s API calls to users outside the cluster.
+- [GateToken](#example_gatetoken_cr): manages the creation of signed tokens used to authenticate with the oc-gate service.
+
 (gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
 
 ## Deploy
