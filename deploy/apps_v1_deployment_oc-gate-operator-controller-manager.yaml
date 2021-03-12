@@ -32,7 +32,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/oc-gate-operator@sha256:16422a78aa052fec6e4de2f94f58f97fc03f3537ae96c7ded61d17b89e344dc7
+        image: quay.io/yaacov/oc-gate-operator@sha256:9337a2ede0cec34fcfc7de651539b49b508366c0a436477d6bdb3907161dc5b4
         livenessProbe:
           httpGet:
             path: /healthz

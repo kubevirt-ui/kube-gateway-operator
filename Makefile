@@ -74,7 +74,6 @@ deploy-dir: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize deploy-dir
-	kubectl create namespace oc-gate-operator-system
 	kubectl apply -f ${ENV_DEPLOY_DIR}
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
