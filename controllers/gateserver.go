@@ -328,6 +328,7 @@ func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.
 
 func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1.GateServer) error {
 	// Create the service and route
+	r.Log.Info("Create the service and route.")
 	se, _ := r.service(s)
 	err := r.Client.Create(ctx, se)
 	if err != nil {
@@ -341,18 +342,21 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	}
 
 	// Create the service account and roles
+	r.Log.Info("Create the service account and roles.")
 	sa, _ := r.serviceaccount(s)
 	err = r.Client.Create(ctx, sa)
 	if err != nil {
 		return err
 	}
 	if s.Spec.AdminNamespaced {
+		r.Log.Info("Create namespaced role.")
 		role, _ := r.role(s)
 		err = r.Client.Create(ctx, role)
 		if err != nil {
 			return err
 		}
 	} else {
+		r.Log.Info("Create cluster role.")
 		role, _ := r.clusterrole(s)
 		err = r.Client.Create(ctx, role)
 		if err != nil {
@@ -366,6 +370,7 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	}
 
 	// Create the gate service
+	r.Log.Info("Create deployment.")
 	dep, _ := r.deployment(s)
 	err = r.Client.Create(ctx, dep)
 	if err != nil {
