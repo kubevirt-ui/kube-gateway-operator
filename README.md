@@ -8,7 +8,7 @@ Operate the [oc-gate](https://github.com/yaacov/oc-gate) service and access toke
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 oc-gate service allow none-k8s users access to single k8s resource for a limited time.
-It uses signed, expiring JWTs to grant non k8s users access via an oc-gate pxoy service.
+It uses signed, expiring JWTs to grant non k8s users access via a proxy server.
 
 Once installed the operator manages two custom resources:
 
