@@ -73,7 +73,6 @@ func (r *GateServerReconciler) service(s *ocgatev1beta1.GateServer) (*corev1.Ser
 			},
 		},
 	}
-
 	controllerutil.SetControllerReference(s, service, r.Scheme)
 
 	return service, nil
@@ -105,7 +104,6 @@ func (r *GateServerReconciler) route(s *ocgatev1beta1.GateServer) (*routev1.Rout
 			WildcardPolicy: routev1.WildcardPolicyNone,
 		},
 	}
-
 	controllerutil.SetControllerReference(s, route, r.Scheme)
 
 	return route, nil
@@ -166,7 +164,6 @@ func (r *GateServerReconciler) role(s *ocgatev1beta1.GateServer) (*rbacv1.Role, 
 			},
 		},
 	}
-
 	controllerutil.SetControllerReference(s, role, r.Scheme)
 
 	return role, nil
@@ -204,22 +201,14 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 			},
 		},
 	}
-
 	controllerutil.SetControllerReference(s, role, r.Scheme)
 
 	return role, nil
 }
 
 func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1.RoleBinding, error) {
-	var roleRefKind string
 	labels := map[string]string{
 		"app": s.Name,
-	}
-
-	if s.Spec.AdminNamespaced {
-		roleRefKind = "Role"
-	} else {
-		roleRefKind = "ClusterRole"
 	}
 
 	rolebinding := &rbacv1.RoleBinding{
@@ -236,11 +225,37 @@ func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     roleRefKind,
+			Kind:     "Role",
 			Name:     s.Name,
 		},
 	}
+	controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
 
+	return rolebinding, nil
+}
+
+func (r *GateServerReconciler) clusterrolebinding(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRoleBinding, error) {
+	labels := map[string]string{
+		"app": s.Name,
+	}
+
+	rolebinding := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   s.Name,
+			Labels: labels,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind: "ServiceAccount",
+				Name: s.Name,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     s.Name,
+		},
+	}
 	controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
 
 	return rolebinding, nil
@@ -362,6 +377,12 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		if err != nil {
 			return err
 		}
+
+		rolebinding, _ := r.rolebinding(s)
+		err = r.Client.Create(ctx, rolebinding)
+		if err != nil {
+			return err
+		}
 	} else {
 		r.Log.Info("Create cluster role.")
 		role, _ := r.clusterrole(s)
@@ -369,11 +390,12 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		if err != nil {
 			return err
 		}
-	}
-	rolebinding, _ := r.rolebinding(s)
-	err = r.Client.Create(ctx, rolebinding)
-	if err != nil {
-		return err
+
+		rolebinding, _ := r.clusterrolebinding(s)
+		err = r.Client.Create(ctx, rolebinding)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Create the gate service
