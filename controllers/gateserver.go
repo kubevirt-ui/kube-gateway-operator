@@ -193,9 +193,8 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 
 	role := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
-			Namespace: s.Namespace,
-			Labels:    labels,
+			Name:   s.Name,
+			Labels: labels,
 		},
 		Rules: []rbacv1.PolicyRule{
 			{

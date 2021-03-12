@@ -71,6 +71,8 @@ Get a token:
 
 ## Example GateToken CR
 
+Note: the token signiture requires a secret holding the private key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
+
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
 kind: GateToken
@@ -82,6 +84,8 @@ spec:
 ```
 
 ## Example GateServer CR
+
+Note: the server signiture authentication requires a secret holding the public key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
@@ -104,6 +108,7 @@ metadata:
   name: gateserver-sample
   namespace: oc-gate
 spec:
-  image: quay.io/yaacov/oc-gate:v0.0.1 # Optional for disconnected clusters
+  # image is optional field for disconnected clusters
+  image: quay.io/yaacov/oc-gate:v0.0.1
   route: test-proxy.apps.ostest.test.metalkube.org
 ```
