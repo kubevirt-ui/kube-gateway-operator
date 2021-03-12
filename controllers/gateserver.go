@@ -211,8 +211,15 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 }
 
 func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1.RoleBinding, error) {
+	var roleRefKind string
 	labels := map[string]string{
 		"app": s.Name,
+	}
+
+	if s.Spec.AdminNamespaced {
+		roleRefKind = "Role"
+	} else {
+		roleRefKind = "ClusterRole"
 	}
 
 	rolebinding := &rbacv1.RoleBinding{
@@ -229,7 +236,7 @@ func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
+			Kind:     roleRefKind,
 			Name:     s.Name,
 		},
 	}
