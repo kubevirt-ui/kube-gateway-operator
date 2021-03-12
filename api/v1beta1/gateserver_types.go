@@ -67,6 +67,13 @@ type GateServerSpec struct {
 	// +kubebuilder:default:=""
 	AdminResources string `json:"admin-resources,omitempty"`
 
+	// admin-namespaced determain if the athorization role of the service is namespaced.
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="boolean"
+	// +kubebuilder:default:=false
+	AdminNamespaced bool `json:"admin-namespaced,omitempty"`
+
 	// passthrough the tokens acquired from OAuth2 server directly to k8s API.
 	// +optional
 	// +kubebuilder:validation:Optional
