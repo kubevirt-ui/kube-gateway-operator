@@ -31,6 +31,8 @@ oc create -f deploy
 vim deploy/apps_v1_deployment_oc-gate-operator-controller-manager.yaml
 ```
 
+[![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
+
 ### Remove deplyment
 
 ```bash
@@ -64,10 +66,6 @@ Available fields are:
 - from: string, from is time of token invocation, the token will not validate before this time, the token duration will start from this time. Defalut to token object creation time.
 
 Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: oc-gate-jwt-secret), once token is ready it will be available in the GateToken status.
-
-Get a token:
-
-[![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
 
 ## Example GateToken CR
 
