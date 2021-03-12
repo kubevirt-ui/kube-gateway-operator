@@ -12,8 +12,8 @@ It uses signed, expiring JWTs to grant non k8s users access.
 
 Once installed the operator manages two custom resources:
 
-- [GateServer](#example_gateserver_cr): louches the oc-gate service that proxy k8s API calls to users outside the cluster.
-- [GateToken](#example_gatetoken_cr): manages the creation of signed tokens used to authenticate with the oc-gate service.
+- [GateServer](#example-gateserver-cr): louches the oc-gate service that proxy k8s API calls to users outside the cluster.
+- [GateToken](#example-gatetoken-cr): manages the creation of signed tokens used to authenticate with the oc-gate service.
 
 (gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
 
