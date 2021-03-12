@@ -30,6 +30,10 @@ spec:
           spec:
             description: GateServerSpec defines the desired state of GateServer
             properties:
+              admin-namespaced:
+                default: false
+                description: admin-namespaced determain if the athorization role of the service is namespaced.
+                type: boolean
               admin-resources:
                 default: ""
                 description: admin-resources is a comma separated list of resources athorization role of the service, if left empty service could access any resource. Defalut value is "".
