@@ -37,7 +37,7 @@ type GateServerSpec struct {
 	// +kubebuilder:default:="https://kubernetes.default.svc"
 	APIURL string `json:"api-url,omitempty"`
 
-	// route for the gate proxy server.
+	// route is the the gate proxy server.
 	// +required
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type="string"
@@ -68,13 +68,15 @@ type GateServerSpec struct {
 	AdminResources string `json:"admin-resources,omitempty"`
 
 	// admin-namespaced determain if the athorization role of the service is namespaced.
+	// Defalut value is false.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
 	AdminNamespaced bool `json:"admin-namespaced,omitempty"`
 
-	// passthrough the tokens acquired from OAuth2 server directly to k8s API.
+	// passthrough determain if the tokens acquired from OAuth2 server directly to k8s API.
+	// Defalut value is false.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"

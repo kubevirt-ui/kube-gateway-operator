@@ -2,33 +2,59 @@
 
 ![alt gopher network](https://raw.githubusercontent.com/yaacov/oc-gate/main/web/public/network-side.png)
 
-creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
+Operate the [oc-gate](https://github.com/yaacov/oc-gate) service on a cluster.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 (gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
 
-## Install
+## Deploy
 
 ``` bash
 # Clone repository
 git clone git@github.com:yaacov/oc-gate-operator.git
 cd oc-gate-operator
 
-# Add the private/public key secret used to generate tokens
+# Create namespace and add the private/public key secret used to generate tokens
+oc new-project oc-gate-operator-system
 oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 
 # Deoploy
-oc new-project oc-gate-operator-system
 oc create -f deploy
+```
 
-#oc delete -f deploy
+### Disconnected clusters
+
+``` bash
+# Edit the operator image in operator-controller-manager yaml file.
+vim deploy/apps_v1_deployment_oc-gate-operator-controller-manager.yaml
+```
+
+### Remove deplyment
+
+```bash
+# Un-Deploy
+oc delete -f deploy
 ```
 
 ## Usage
 
-Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD,
+### Setting up the [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateService CRD
+
+Available fields are:
+
+- route is: the the gate proxy server.
+- api-url: is the k8s API url, defalut value is "https://kubernetes.default.svc".
+- admin-role: is the verbs athorization role of the service (reader/admin), defalut value is "reader".
+- admin-resources: is a comma separated list of resources athorization role of the service, defalut value is "" (allow all).
+- admin-namespaced: determain if the athorization role of the service is namespaced, defalut value is false.
+- passthrough: determain if  the tokens acquired from OAuth2 server directly to k8s API, defalut value is false.
+- image: is the oc gate proxy image to use, defalut value is "quay.io/yaacov/oc-gate:latest".
+
+Creating a service requires a secret holding a RSA public-key for sighing the token in the namespace of the service (secret name: oc-gate-jwt-secret).
+
+### Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD
 
 Available fields are:
 
@@ -37,7 +63,7 @@ Available fields are:
 - duration-sec: int, duration-sec is the duration in sec the token will be validated since it's invocation. Defalut value is 3600s (1h).
 - from: string, from is time of token invocation, the token will not validate before this time, the token duration will start from this time. Defalut to token object creation time.
 
-Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: oc-gate-jwt-secret), nce token is ready it will be available in the GateToken status.
+Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: oc-gate-jwt-secret), once token is ready it will be available in the GateToken status.
 
 Get a token:
 
@@ -67,22 +93,17 @@ spec:
   route: test-proxy.apps.ostest.test.metalkube.org
 ```
 
-## Customize deploy
+### Set the image field on disconnected clusters
 
-Requires
+On disconnected clusters use the optional image field in the GateServer CRD.
 
-- requires GOLANG ver >= v1.15 dev env.
-- user with admin permisions logged into the cluster.
-
-```bash
-# Deploy the operator, RBAC roles and CRDs
-export USERNAME=yaacov
-make deploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
+```yaml
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateServer
+metadata:
+  name: gateserver-sample
+  namespace: oc-gate
+spec:
+  image: quay.io/yaacov/oc-gate:v0.0.1 # Optional for disconnected clusters
+  route: test-proxy.apps.ostest.test.metalkube.org
 ```
-
-```bash
-# Remove deployment of the operator, RBAC roles and CRDs
-export USERNAME=yaacov
-make undeploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
-```
-
