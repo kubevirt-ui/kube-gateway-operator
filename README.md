@@ -31,6 +31,8 @@ oc create -f deploy
 vim deploy/apps_v1_deployment_oc-gate-operator-controller-manager.yaml
 ```
 
+#### GateToken demo:
+
 [![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
 
 ### Remove deplyment
