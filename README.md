@@ -20,16 +20,11 @@ Once installed the operator manages two custom resources:
 ## Deploy
 
 ``` bash
-# Clone repository
-git clone git@github.com:yaacov/oc-gate-operator.git
-cd oc-gate-operator
-
-# Create namespace and add the private/public key secret used to generate tokens
-oc new-project oc-gate-operator-system
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
-
 # Deoploy
 oc create -f deploy
+
+# Create namespace and add the private/public key secret used to generate tokens
+oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 ```
 
 ### Disconnected clusters
