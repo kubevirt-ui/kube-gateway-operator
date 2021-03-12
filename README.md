@@ -34,7 +34,7 @@ oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-fi
 
 ``` bash
 # Edit the operator image in operator-controller-manager yaml file.
-vim deploy/apps_v1_deployment_oc-gate-operator-controller-manager.yaml
+vim deploy/oc-gate-operator.yaml
 ```
 
 #### GateToken demo:
