@@ -97,5 +97,13 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		return err
 	}
 
+	// Create the oauthclient
+	r.Log.Info("Create oauthclient.")
+	oauth, _ := r.oauthclient(s)
+	err = r.Client.Create(ctx, oauth)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	oauthv1 "github.com/openshift/api/oauth/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,18 +45,19 @@ type GateServerReconciler struct {
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="route.openshift.io",resources=routes,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="route.openshift.io",resources=routes/custom-host,verbs=create;patch
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete;deletecollection
-// +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/finalizers,verbs=update
+// +kubebuilder:rbac:groups="route.openshift.io",resources=routes,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="route.openshift.io",resources=routes/custom-host,verbs=create;patch
+// +kubebuilder:rbac:groups="oauth.openshift.io",resources=oauthclients,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="security.openshift.io",resources=securitycontextconstraints,resourceNames=privileged,verbs=use
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gateservers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gateservers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gateservers/finalizers,verbs=update
 
 // In order to grant client users access to resource, the operator it'slef need this access.
 // Note: to create a new gate server with admin role, the role of this operator need to be adjusted.
@@ -194,6 +196,18 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 			r.Log.Info("Failed to finalize gateserver", "err", err)
 			return nil
 		}
+	}
+
+	opts := &client.DeleteOptions{}
+	oauthclient := &oauthv1.OAuthClient{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+		},
+	}
+	err := r.Delete(ctx, oauthclient, opts)
+	if err != nil {
+		r.Log.Info("Failed to finalize gateserver", "err", err)
+		return nil
 	}
 
 	r.Log.Info("Successfully finalized gateserver")

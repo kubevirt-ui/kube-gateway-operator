@@ -94,6 +94,7 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 			"-jwt-token-key-file=/jwt-secret/cert.pem",
 			"-k8s-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
 			fmt.Sprintf("-k8s-bearer-token-passthrough=%v", s.Spec.PassThrough),
+			fmt.Sprintf("-oauth-client-secret=%s-oauth-secret", s.Name),
 		},
 	}}
 

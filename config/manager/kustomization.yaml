@@ -11,6 +11,6 @@ configMapGenerator:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
-- digest: sha256:7c3a7a543311e6e8eefe832094eff28eefed129dd7741a554dc4cb67b13d4e81
+- digest: sha256:8c2d1211df48c5ae6d7457609dba75e0b5898ebbb57ca9e3b9ee621e19df67dc
   name: controller
   newName: quay.io/yaacov/oc-gate-operator

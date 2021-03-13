@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
+	oauthv1 "github.com/openshift/api/oauth/v1"
 	routev1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -111,4 +112,24 @@ func (r *GateServerReconciler) serviceaccount(s *ocgatev1beta1.GateServer) (*cor
 	controllerutil.SetControllerReference(s, serviceaccount, r.Scheme)
 
 	return serviceaccount, nil
+}
+
+func (r *GateServerReconciler) oauthclient(s *ocgatev1beta1.GateServer) (*oauthv1.OAuthClient, error) {
+	labels := map[string]string{
+		"app": s.Name,
+	}
+
+	oauthclient := &oauthv1.OAuthClient{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.Name,
+			Namespace: s.Namespace,
+			Labels:    labels,
+		},
+		GrantMethod:  oauthv1.GrantHandlerAuto,
+		Secret:       fmt.Sprintf("%s-oauth-secret", s.Name),
+		RedirectURIs: []string{fmt.Sprintf("https://%s/auth/callback", s.Spec.Route)},
+	}
+	controllerutil.SetControllerReference(s, oauthclient, r.Scheme)
+
+	return oauthclient, nil
 }
