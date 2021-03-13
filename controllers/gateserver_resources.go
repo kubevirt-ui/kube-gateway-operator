@@ -121,15 +121,13 @@ func (r *GateServerReconciler) oauthclient(s *ocgatev1beta1.GateServer) (*oauthv
 
 	oauthclient := &oauthv1.OAuthClient{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
-			Namespace: s.Namespace,
-			Labels:    labels,
+			Name:   s.Name,
+			Labels: labels,
 		},
 		GrantMethod:  oauthv1.GrantHandlerAuto,
 		Secret:       fmt.Sprintf("%s-oauth-secret", s.Name),
 		RedirectURIs: []string{fmt.Sprintf("https://%s/auth/callback", s.Spec.Route)},
 	}
-	controllerutil.SetControllerReference(s, oauthclient, r.Scheme)
 
 	return oauthclient, nil
 }
