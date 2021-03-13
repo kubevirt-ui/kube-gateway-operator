@@ -3,7 +3,7 @@
 ```bash
 make
 
-IMG=quay.io/yaacov/oc-gate-operator make && make podman-build && make podman-push
+export IMG=quay.io/yaacov/oc-gate-operator && make && make podman-build && make podman-push
 ```
 
 ## Build image

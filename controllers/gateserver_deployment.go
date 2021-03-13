@@ -41,11 +41,11 @@ func initContainers(s *ocgatev1beta1.GateServer) []corev1.Container {
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      "web-application",
-				MountPath: "/app/web/public",
+				MountPath: "/app/web",
 			},
 		},
 		Command: []string{
-			"cp -r /data/web/public/* /app/web/public/",
+			"/bin/cp", "-r", "/data/web/public", "/app/web/",
 		},
 	}}
 
@@ -68,7 +68,7 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 	if s.Spec.WebAppImage != "" {
 		webAppVolumeMount := corev1.VolumeMount{
 			Name:      "web-application",
-			MountPath: "/app/web/public",
+			MountPath: "/app/web",
 		}
 
 		volumeMounts = append(volumeMounts, webAppVolumeMount)
