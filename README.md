@@ -121,6 +121,7 @@ metadata:
 spec:
   # image is optional field for disconnected clusters
   image: quay.io/yaacov/oc-gate:latest
+  # use the web-app-image to customize the static files of your web app.
   web-app-image: quay.io/yaacov/oc-gate-web-app-novnc:latest
   route: test-proxy.apps.ostest.test.metalkube.org
 ```
