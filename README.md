@@ -120,6 +120,7 @@ metadata:
   namespace: oc-gate
 spec:
   # image is optional field for disconnected clusters
-  image: quay.io/yaacov/oc-gate:v0.0.1
+  image: quay.io/yaacov/oc-gate:latest
+  web-app-image: quay.io/yaacov/oc-gate-web-app-novnc:latest
   route: test-proxy.apps.ostest.test.metalkube.org
 ```
