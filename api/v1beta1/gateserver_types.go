@@ -90,6 +90,19 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:="quay.io/yaacov/oc-gate:latest"
 	Image string `json:"image,omitempty"`
+
+	// web-app-image is the oc gate proxy web application image to use,
+	// It's an image including the static web application to be served together
+	// with k8s API.
+	// The static web application should be in the directory "/data/web/public/"
+	// and it will be copied to the proxy servers "/web/public/" directory on pproxy
+	// startup. If left empty, the proxies default web application will not be replaced.
+	// Defalut value is "" (use default web application).
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:MaxLength=1024
+	// +kubebuilder:default:=""
+	WebAppImage string `json:"web-app-image,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer
