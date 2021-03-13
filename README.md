@@ -61,6 +61,7 @@ Available fields are:
 - admin-namespaced: determain if the athorization role of the service is namespaced, defalut value is false.
 - passthrough: determain if  the tokens acquired from OAuth2 server directly to k8s API, defalut value is false.
 - image: is the oc gate proxy image to use, defalut value is "quay.io/yaacov/oc-gate:latest".
+- web-app-image is the web application image to use, if left empty, the default web application is used, for example quay.io/yaacov/oc-gate-web-app-novnc is an image containing novnc web application to access kubevirt virtual machines)
 
 Creating a service requires a secret holding a RSA public-key for sighing the token in the namespace of the service (secret name: oc-gate-jwt-secret).
 
