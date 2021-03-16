@@ -21,7 +21,8 @@ Once installed the operator manages two custom resources:
 
 ``` bash
 # Deoploy the gate operator.
-kubectl create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
+kubectl create -f \
+    https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
 ```
 
 #### Deploy a gate server
@@ -31,7 +32,8 @@ kubectl create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main
 kubectl create namespace oc-gate
 
 # Download and customize the oc-gate-server example.
-curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml -o oc-gate-server.yaml
+curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml \
+    -o oc-gate-server.yaml
 
 # Edit and deploy the gate server example.
 vmi oc-gate-server.yaml
@@ -44,7 +46,8 @@ In disconnected enviorments without access to public image repository, edit the 
 
 ``` bash
 # Edit the operator image in operator-controller-manager yaml file.
-curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml -o oc-gate-operator.yaml
+curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml \
+    -o oc-gate-operator.yaml
 
 vim deploy/oc-gate-operator.yaml
 ```
