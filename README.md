@@ -60,9 +60,9 @@ kubectl create -f oc-gate-operator.yaml
 
 ## Example GateToken CR
 
-Note: the token signiture requires a secret holding the private key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
+Note: the token signiture requires a secret holding the private key in the same namespace, see the deploy section for how to create the secret.
 
-This example will generate a token that will give it's holder access to API calls matching the path "/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc" for 1 hour.
+This example will generate a token that will give it's holder access to API calls matching the path "/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc" for 1 hour. You can edit the route to match the route designated for the gate server on your cluster.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
