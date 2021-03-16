@@ -21,21 +21,31 @@ Once installed the operator manages two custom resources:
 
 ``` bash
 # Deoploy the gate operator.
-oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
 ```
 
 #### Deploy a gate server
 
 ``` bash
-# Deploy a gate server.
-oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-namespace.yaml
-oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml
+# Create a namespace to run the gate server.
+kubectl create namespace oc-gate
+
+# Download and customize the oc-gate-server example.
+curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml -o oc-gate-server.yaml
+
+# Edit and deploy the gate server example.
+vmi oc-gate-server.yaml
+kubectl create -f oc-gate-server.yaml
 ```
 
 ### Disconnected clusters
 
+In disconnected enviorments without access to public image repository, edit the yaml examples to use internaly provided container images.
+
 ``` bash
 # Edit the operator image in operator-controller-manager yaml file.
+curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml -o oc-gate-operator.yaml
+
 vim deploy/oc-gate-operator.yaml
 ```
 
@@ -43,44 +53,9 @@ vim deploy/oc-gate-operator.yaml
 
 [![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
 
-### Remove deplyment
-
-```bash
-# Un-Deploy the gate server.
-oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml
-oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-namespace.yaml
-
-# Un-Deploy the gate operator.
-oc delete -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
-```
-
 ## Usage
 
 ### Setting up the [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateService CRD
-
-Available fields are:
-
-- route is: the the gate proxy server.
-- api-url: is the k8s API url, defalut value is "https://kubernetes.default.svc".
-- admin-role: is the verbs athorization role of the service (reader/admin), defalut value is "reader".
-- admin-resources: is a comma separated list of resources athorization role of the service, defalut value is "" (allow all).
-- admin-namespaced: determain if the athorization role of the service is namespaced, defalut value is false.
-- passthrough: determain if  the tokens acquired from OAuth2 server directly to k8s API, defalut value is false.
-- image: is the oc gate proxy image to use, defalut value is "quay.io/yaacov/oc-gate:latest".
-- web-app-image is the web application image to use, if left empty, the default web application is used, for example quay.io/yaacov/oc-gate-web-app-novnc is an image containing novnc web application to access kubevirt virtual machines)
-
-Creating a service requires a secret holding a RSA public-key for sighing the token in the namespace of the service (secret name: oc-gate-jwt-secret).
-
-### Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD
-
-Available fields are:
-
-- match-path: string (required), match-path is a regular expresion used to validate API request path, API requests matching this pattern will be validated by the token. This field may not be empty.
-- match-method: string, a comma separeted list of allowed http methods, defoult is "GET,OPTIONS"
-- duration-sec: int, duration-sec is the duration in sec the token will be validated since it's invocation. Defalut value is 3600s (1h).
-- from: string, from is time of token invocation, the token will not validate before this time, the token duration will start from this time. Defalut to token object creation time.
-
-Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: oc-gate-jwt-secret), once token is ready it will be available in the GateToken status.
 
 ## Example GateToken CR
 
@@ -99,8 +74,6 @@ spec:
 ```
 
 ## Example GateServer CR
-
-Note: the server needs to be installed only once in a cluster.
 
 This example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org".
 
