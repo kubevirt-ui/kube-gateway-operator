@@ -17,3 +17,17 @@ operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1 --index-im
 
 operator-sdk cleanup oc-gate-operator
 ```
+
+## Build bundle
+
+```bash
+export IMG=quay.io/yaacov/oc-gate-operator@sha256:98de8105eefb10263a52bd2730b3c5fee0b9a21960db34089f56a6dba8eec289
+make bundle
+make bundle-build
+```
+
+## Push Bundle
+
+```bash
+podman push quay.io/yaacov/oc-gate-operator-bundle:v0.0.1
+```

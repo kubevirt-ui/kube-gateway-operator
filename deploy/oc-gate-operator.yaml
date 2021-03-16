@@ -58,6 +58,10 @@ spec:
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
+              gnerate-secret:
+                default: true
+                description: gnerate-secret determain if a secrete with public and private kes will be automatically generated when the oc-gate server is created. Defalut value is true.
+                type: boolean
               image:
                 default: quay.io/yaacov/oc-gate:latest
                 description: image is the oc gate proxy image to use. Defalut value is "quay.io/yaacov/oc-gate:latest".
@@ -342,8 +346,12 @@ rules:
   resources:
   - secrets
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - ""
@@ -665,7 +673,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/oc-gate-operator@sha256:c6c5c6e8491200ff1334d100a452b793b9913cfaed3b0d465ecd66a751307529
+        image: quay.io/yaacov/oc-gate-operator@sha256:951cb19871841054472637f55d8f78d07bcb069f3a5ce0984984f23a16664ee9
         livenessProbe:
           httpGet:
             path: /healthz

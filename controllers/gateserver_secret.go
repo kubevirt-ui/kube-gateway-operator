@@ -71,6 +71,26 @@ func encodePrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
 	return privatePEM
 }
 
+// encodePublicKeyToPEM encodes public Key from RSA to PEM format
+func encodePublicKeyToPEM(pubkey *rsa.PublicKey) ([]byte, error) {
+	// Get ASN.1 DER format
+	pubDER, err := x509.MarshalPKIXPublicKey(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	// pem.Block
+	pubBlock := pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: pubDER,
+	}
+
+	// public key in PEM format
+	pubPEM := pem.EncodeToMemory(&pubBlock)
+
+	return pubPEM, nil
+}
+
 // generatePublicKey take a rsa.PublicKey and return bytes suitable for writing to .pub file
 // returns in the format "ssh-rsa ..."
 func generatePublicKey(privatekey *rsa.PublicKey) ([]byte, error) {
@@ -95,7 +115,7 @@ func (r *GateServerReconciler) secret(s *ocgatev1beta1.GateServer) (*corev1.Secr
 		return nil, err
 	}
 
-	publicKeyBytes, err := generatePublicKey(&privateKey.PublicKey)
+	publicKeyBytes, err := encodePublicKeyToPEM(&privateKey.PublicKey)
 	if err != nil {
 		return nil, err
 	}

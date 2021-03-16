@@ -3,7 +3,7 @@
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
-VERSION ?= 0.0.1
+VERSION ?= latest
 
 # CHANNELS define the bundle channels used in the bundle. 
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "preview,fast,stable")
@@ -26,10 +26,10 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= quay.io/yaacov/oc-gate-operator-bundle:v0.0.1
+BUNDLE_IMG ?= quay.io/yaacov/oc-gate-operator-bundle
 
 # Image URL to use all building/pushing image targets
-IMG ?= quay.io/yaacov/oc-gate-operator:v0.0.1
+IMG ?= quay.io/yaacov/oc-gate-operator
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
@@ -74,11 +74,11 @@ deploy-dir: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize deploy-dir
-	kubectl apply -f ${ENV_DEPLOY_DIR}
+	kubectl apply -f ${ENV_DEPLOY_DIR}/oc-gate-operator.yaml
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
 undeploy:
-	$(KUSTOMIZE) build config/default | kubectl delete -f -
+	kubectl delete -f ${ENV_DEPLOY_DIR}/oc-gate-operator.yaml
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen

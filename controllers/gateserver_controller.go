@@ -43,7 +43,7 @@ type GateServerReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;watch;create;update;patch;delete
@@ -167,6 +167,8 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 
 	// If not namespaces, then check and delete named cluster role.
 	if !s.Spec.AdminNamespaced {
+		r.Log.Info("Deleting cluster role and cluster role binding...")
+
 		opts := &client.DeleteOptions{}
 
 		clusterRole := &rbacv1.ClusterRole{
@@ -191,6 +193,7 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 		}
 	}
 
+	r.Log.Info("Deleting oauthclient...")
 	opts := &client.DeleteOptions{}
 	oauthclient := &oauthv1.OAuthClient{
 		ObjectMeta: metav1.ObjectMeta{
