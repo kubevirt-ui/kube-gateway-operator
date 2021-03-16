@@ -60,8 +60,6 @@ kubectl create -f oc-gate-operator.yaml
 
 ## Example GateToken CR
 
-Note: the token signiture requires a secret holding the private key in the same namespace, see the deploy section for how to create the secret.
-
 This example will generate a token that will give it's holder access to API calls matching the path "/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc" for 1 hour. You can edit the route to match the route designated for the gate server on your cluster.
 
 ```yaml
@@ -76,7 +74,7 @@ spec:
 
 ## Example GateServer CR
 
-This example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org".
+After the operator is set, users need to set up a gate server, this example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org". One gate server can handle requests for resources from different users and over different namespaces.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
