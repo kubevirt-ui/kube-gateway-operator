@@ -55,8 +55,6 @@ vim deploy/oc-gate-operator.yaml
 
 ## Usage
 
-### Setting up the [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateService CRD
-
 ## Example GateToken CR
 
 Note: the token signiture requires a secret holding the private key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
