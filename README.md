@@ -17,17 +17,19 @@ Once installed the operator manages two custom resources:
 
 (gopher network image - [egonelbre/gophers](https://github.com/egonelbre/gophers))
 
-## Deploy
+## Deploy the operator
 
 ``` bash
-# Deoploy.
+# Deoploy the gate operator.
 oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
+```
 
-# Create private/public key pair secret used to generate and autheticate tokens.
-openssl genrsa -out key.pem
-openssl req -new -x509 -sha256 -key key.pem -out cert.pem -days 3650
+#### Deploy a gate server
 
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=cert.pem --from-file=key.pem
+``` bash
+# Deploy a gate server.
+oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-namespace.yaml
+oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml
 ```
 
 ### Disconnected clusters
@@ -44,7 +46,11 @@ vim deploy/oc-gate-operator.yaml
 ### Remove deplyment
 
 ```bash
-# Un-Deploy
+# Un-Deploy the gate server.
+oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml
+oc create -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-namespace.yaml
+
+# Un-Deploy the gate operator.
 oc delete -f https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml
 ```
 
@@ -94,7 +100,7 @@ spec:
 
 ## Example GateServer CR
 
-Note: the server signiture authentication requires a secret holding the public key in the same namespace, see the [deploy](#deploy) section for how to create the secret.
+Note: the server needs to be installed only once in a cluster.
 
 This example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org".
 
