@@ -89,6 +89,16 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		}
 	}
 
+	// Create the JWT secret
+	if s.Spec.GenerateSecret {
+		r.Log.Info("Create JWT secret.")
+		secret, _ := r.secret(s)
+		err = r.Client.Create(ctx, secret)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Create the gate service
 	r.Log.Info("Create deployment.")
 	dep, _ := r.deployment(s)

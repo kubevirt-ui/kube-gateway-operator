@@ -21,6 +21,7 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
@@ -57,6 +58,7 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 			},
 		},
 	}
+	controllerutil.SetControllerReference(s, role, r.Scheme)
 
 	return role, nil
 }
@@ -84,6 +86,7 @@ func (r *GateServerReconciler) clusterrolebinding(s *ocgatev1beta1.GateServer) (
 			Name:     s.Name,
 		},
 	}
+	controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
 
 	return rolebinding, nil
 }

@@ -103,6 +103,15 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:=""
 	WebAppImage string `json:"web-app-image,omitempty"`
+
+	// gnerate-secret determain if a secrete with public and private kes will be automatically
+	// generated when the oc-gate server is created.
+	// Defalut value is true.
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="boolean"
+	// +kubebuilder:default:=true
+	GenerateSecret bool `json:"gnerate-secret,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer
