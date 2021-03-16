@@ -75,10 +75,14 @@ deploy-dir: manifests kustomize
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests kustomize deploy-dir
 	kubectl apply -f ${ENV_DEPLOY_DIR}/oc-gate-operator.yaml
+	kubectl apply -f ${ENV_DEPLOY_DIR}/oc-gate-namespace.yaml
+	kubectl apply -f ${ENV_DEPLOY_DIR}/oc-gate-server.yaml
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
 undeploy:
 	kubectl delete -f ${ENV_DEPLOY_DIR}/oc-gate-operator.yaml
+	kubectl delete -f ${ENV_DEPLOY_DIR}/oc-gate-server.yaml
+	kubectl delete -f ${ENV_DEPLOY_DIR}/oc-gate-namespace.yaml
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
