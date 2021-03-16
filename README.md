@@ -35,7 +35,6 @@ kubectl create namespace oc-gate
 curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-server.yaml \
     -o oc-gate-server.yaml
 
-# Edit and deploy the gate server example.
 vmi oc-gate-server.yaml
 kubectl create -f oc-gate-server.yaml
 ```
@@ -49,7 +48,8 @@ In disconnected enviorments without access to public image repository, edit the 
 curl https://raw.githubusercontent.com/yaacov/oc-gate-operator/main/deploy/oc-gate-operator.yaml \
     -o oc-gate-operator.yaml
 
-vim deploy/oc-gate-operator.yaml
+vim oc-gate-operator.yaml
+kubectl create -f oc-gate-operator.yaml
 ```
 
 #### GateToken demo:
