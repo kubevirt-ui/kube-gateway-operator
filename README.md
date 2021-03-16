@@ -76,19 +76,6 @@ spec:
 
 After the operator is set, users need to set up a gate server, this example will create an oc-gate proxy server, wating for requests on URL "https://test-proxy.apps.ostest.test.metalkube.org". One gate server can handle requests for resources from different users and over different namespaces.
 
-```yaml
-apiVersion: ocgate.yaacov.com/v1beta1
-kind: GateServer
-metadata:
-  name: gateserver-sample
-  namespace: oc-gate
-spec:
-  route: test-proxy.apps.ostest.test.metalkube.org
-```
-
-### Set the image field on disconnected clusters
-
-On disconnected clusters use the optional image field in the GateServer CRD.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
@@ -97,9 +84,8 @@ metadata:
   name: gateserver-sample
   namespace: oc-gate
 spec:
-  # image is optional field for disconnected clusters
-  image: quay.io/yaacov/oc-gate:latest
   # use the web-app-image to customize the static files of your web app.
   web-app-image: quay.io/yaacov/oc-gate-web-app-novnc:latest
+  image: quay.io/yaacov/oc-gate:latest
   route: test-proxy.apps.ostest.test.metalkube.org
 ```
