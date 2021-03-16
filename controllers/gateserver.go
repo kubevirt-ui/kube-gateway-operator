@@ -43,48 +43,42 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	// Create the service and route
 	r.Log.Info("Create the service and route.")
 	se, _ := r.service(s)
-	err := r.Client.Create(ctx, se)
-	if err != nil {
+	if err := r.Client.Create(ctx, se); err != nil {
 		return err
 	}
 
 	route, _ := r.route(s)
-	err = r.Client.Create(ctx, route)
-	if err != nil {
+	if err := r.Client.Create(ctx, route); err != nil {
 		return err
 	}
 
 	// Create the service account and roles
 	r.Log.Info("Create the service account and roles.")
 	sa, _ := r.serviceaccount(s)
-	err = r.Client.Create(ctx, sa)
-	if err != nil {
+	if err := r.Client.Create(ctx, sa); err != nil {
 		return err
 	}
+
 	if s.Spec.AdminNamespaced {
 		r.Log.Info("Create namespaced role.")
 		role, _ := r.role(s)
-		err = r.Client.Create(ctx, role)
-		if err != nil {
+		if err := r.Client.Create(ctx, role); err != nil {
 			return err
 		}
 
 		rolebinding, _ := r.rolebinding(s)
-		err = r.Client.Create(ctx, rolebinding)
-		if err != nil {
+		if err := r.Client.Create(ctx, rolebinding); err != nil {
 			return err
 		}
 	} else {
 		r.Log.Info("Create cluster role.")
 		role, _ := r.clusterrole(s)
-		err = r.Client.Create(ctx, role)
-		if err != nil {
+		if err := r.Client.Create(ctx, role); err != nil {
 			return err
 		}
 
 		rolebinding, _ := r.clusterrolebinding(s)
-		err = r.Client.Create(ctx, rolebinding)
-		if err != nil {
+		if err := r.Client.Create(ctx, rolebinding); err != nil {
 			return err
 		}
 	}
@@ -93,8 +87,7 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	if s.Spec.GenerateSecret {
 		r.Log.Info("Create JWT secret.")
 		secret, _ := r.secret(s)
-		err = r.Client.Create(ctx, secret)
-		if err != nil {
+		if err := r.Client.Create(ctx, secret); err != nil {
 			return err
 		}
 	}
@@ -102,16 +95,14 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	// Create the gate service
 	r.Log.Info("Create deployment.")
 	dep, _ := r.deployment(s)
-	err = r.Client.Create(ctx, dep)
-	if err != nil {
+	if err := r.Client.Create(ctx, dep); err != nil {
 		return err
 	}
 
 	// Create the oauthclient
 	r.Log.Info("Create oauthclient.")
 	oauth, _ := r.oauthclient(s)
-	err = r.Client.Create(ctx, oauth)
-	if err != nil {
+	if err := r.Client.Create(ctx, oauth); err != nil {
 		return err
 	}
 

@@ -128,6 +128,7 @@ func (r *GateServerReconciler) oauthclient(s *ocgatev1beta1.GateServer) (*oauthv
 		Secret:       fmt.Sprintf("%s-oauth-secret", s.Name),
 		RedirectURIs: []string{fmt.Sprintf("https://%s/auth/callback", s.Spec.Route)},
 	}
+	controllerutil.SetControllerReference(s, oauthclient, r.Scheme)
 
 	return oauthclient, nil
 }

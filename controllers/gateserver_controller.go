@@ -79,8 +79,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	// Lookup the GateToken instance for this reconcile request
 	gateserver := &ocgatev1beta1.GateServer{}
-	err := r.Get(ctx, req.NamespacedName, gateserver)
-	if err != nil {
+	if err := r.Get(ctx, req.NamespacedName, gateserver); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -108,8 +107,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			// Remove gateserverFinalizer. Once all finalizers have been
 			// removed, the object will be deleted.
 			controllerutil.RemoveFinalizer(gateserver, gateserverFinalizer)
-			err := r.Update(ctx, gateserver)
-			if err != nil {
+			if err := r.Update(ctx, gateserver); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
@@ -123,8 +121,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// Create the server
-	err = r.buildServer(ctx, gateserver)
-	if err != nil {
+	if err := r.buildServer(ctx, gateserver); err != nil {
 		r.Log.Info("Failed to create oc gate proxy.", "err", err)
 
 		setServerCondition(gateserver, "FailedCreateServer", err)
@@ -137,8 +134,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// Add finalizer for this CR
 	if !controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {
 		controllerutil.AddFinalizer(gateserver, gateserverFinalizer)
-		err = r.Update(ctx, gateserver)
-		if err != nil {
+		if err := r.Update(ctx, gateserver); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -172,7 +168,6 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 	// If not namespaces, then check and delete named cluster role.
 	if !s.Spec.AdminNamespaced {
 		opts := &client.DeleteOptions{}
-		var err error
 
 		clusterRole := &rbacv1.ClusterRole{
 			ObjectMeta: metav1.ObjectMeta{
@@ -180,8 +175,7 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 			},
 		}
 
-		err = r.Delete(ctx, clusterRole, opts)
-		if err != nil {
+		if err := r.Delete(ctx, clusterRole, opts); err != nil {
 			r.Log.Info("Failed to finalize gateserver", "err", err)
 			return nil
 		}
@@ -191,8 +185,7 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 				Name: s.Name,
 			},
 		}
-		err = r.Delete(ctx, clusterRoleBinding, opts)
-		if err != nil {
+		if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
 			r.Log.Info("Failed to finalize gateserver", "err", err)
 			return nil
 		}
@@ -204,8 +197,7 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 			Name: s.Name,
 		},
 	}
-	err := r.Delete(ctx, oauthclient, opts)
-	if err != nil {
+	if err := r.Delete(ctx, oauthclient, opts); err != nil {
 		r.Log.Info("Failed to finalize gateserver", "err", err)
 		return nil
 	}

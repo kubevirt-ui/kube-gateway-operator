@@ -65,6 +65,12 @@ spec:
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
+              gnerate-secret:
+                default: true
+                description: gnerate-secret determain if a secrete with public and
+                  private kes will be automatically generated when the oc-gate server
+                  is created. Defalut value is true.
+                type: boolean
               image:
                 default: quay.io/yaacov/oc-gate:latest
                 description: image is the oc gate proxy image to use. Defalut value
