@@ -26,6 +26,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
 
@@ -89,6 +93,33 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// If token is ready, create sideeffects
 		// and set phase to ready
 
+		if token.Spec.GenerateServiceAccount {
+			r.Log.Info("Create namespaced service account.")
+			sa, _ := r.serviceaccount(token)
+			if err := r.Client.Create(ctx, sa); err != nil {
+				r.Log.Info("Pending RequeueAfter", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(nbf-now) * time.Second,
+				}, nil
+			}
+
+			role, _ := r.role(token)
+			if err := r.Client.Create(ctx, role); err != nil {
+				r.Log.Info("Pending RequeueAfter", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(nbf-now) * time.Second,
+				}, nil
+			}
+
+			rolebinding, _ := r.rolebinding(token)
+			if err := r.Client.Create(ctx, rolebinding); err != nil {
+				r.Log.Info("Pending RequeueAfter", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(nbf-now) * time.Second,
+				}, nil
+			}
+		}
+
 		setReadyCondition(token, "Ready", "Token is ready")
 
 		if err := r.Status().Update(ctx, token); err != nil {
@@ -113,6 +144,53 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		// If token expired, delete sideeffects
 		// and set phase to completed
+
+		if token.Spec.GenerateServiceAccount {
+			r.Log.Info("Deleting service acount...")
+
+			opts := &client.DeleteOptions{}
+
+			sa := &corev1.ServiceAccount{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      token.Name,
+					Namespace: token.Namespace,
+				},
+			}
+
+			if err := r.Delete(ctx, sa, opts); err != nil {
+				r.Log.Info("Failed to delete service account", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(exp-now) * time.Second,
+				}, nil
+			}
+
+			role := &rbacv1.Role{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      token.Name,
+					Namespace: token.Namespace,
+				},
+			}
+
+			if err := r.Delete(ctx, role, opts); err != nil {
+				r.Log.Info("Failed to delete role", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(exp-now) * time.Second,
+				}, nil
+			}
+
+			roleBinding := &rbacv1.RoleBinding{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      token.Name,
+					Namespace: token.Namespace,
+				},
+			}
+			if err := r.Delete(ctx, roleBinding, opts); err != nil {
+				r.Log.Info("Failed to delete roleBinding", "err", err)
+				return ctrl.Result{
+					RequeueAfter: time.Duration(exp-now) * time.Second,
+				}, nil
+			}
+		}
 
 		setCompletedCondition(token, "Expired", "Token expired")
 

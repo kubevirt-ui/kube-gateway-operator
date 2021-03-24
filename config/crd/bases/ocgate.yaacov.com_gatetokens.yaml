@@ -49,6 +49,14 @@ spec:
                   time. Defalut to token object creation time.
                 format: date-time
                 type: string
+              gnerate-secret-account:
+                default: false
+                description: gnerate-secret-account determain if the operator will
+                  create a service account and delever the actual service account
+                  token instead of a JWT access key. the service account will be generated
+                  not before the token is valid and will be deleted when the token
+                  expires. Defalut value is false.
+                type: boolean
               match-method:
                 default: GET,OPTIONS
                 description: match-path is a comma separated list of allowed http
@@ -174,7 +182,10 @@ spec:
                 - until
                 type: object
               phase:
-                description: Token generation phase (ready|error)
+                description: Token generation phase (pending|ready|expired|error)
+                type: string
+              service-account-name:
+                description: The generated service account name
                 type: string
               token:
                 description: The generated token
@@ -183,6 +194,7 @@ spec:
             - conditions
             - data
             - phase
+            - service-account-name
             - token
             type: object
         type: object

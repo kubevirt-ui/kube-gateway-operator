@@ -190,6 +190,10 @@ spec:
                 description: from is time of token invocation, the token will not validate before this time, the token duration will start from this time. Defalut to token object creation time.
                 format: date-time
                 type: string
+              gnerate-secret-account:
+                default: false
+                description: gnerate-secret-account determain if the operator will create a service account and delever the actual service account token instead of a JWT access key. the service account will be generated not before the token is valid and will be deleted when the token expires. Defalut value is false.
+                type: boolean
               match-method:
                 default: GET,OPTIONS
                 description: match-path is a comma separated list of allowed http methods, only API requests matching one of the allowed methods will be validated. Defalut value is "GET,OPTIONS".
@@ -284,7 +288,10 @@ spec:
                 - until
                 type: object
               phase:
-                description: Token generation phase (ready|error)
+                description: Token generation phase (pending|ready|expired|error)
+                type: string
+              service-account-name:
+                description: The generated service account name
                 type: string
               token:
                 description: The generated token
@@ -293,6 +300,7 @@ spec:
             - conditions
             - data
             - phase
+            - service-account-name
             - token
             type: object
         type: object
@@ -673,7 +681,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/oc-gate-operator@sha256:816d4308d4019cb15d70335f69e45cca69bbca4d55d8929394c30dc2e62942ff
+        image: quay.io/yaacov/oc-gate-operator@sha256:99347566ddfa5c6d1f7e1fcba937815f3d271ca2fdde298d2e6f335cfab4c57c
         livenessProbe:
           httpGet:
             path: /healthz

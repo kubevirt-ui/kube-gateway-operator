@@ -75,6 +75,17 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:="GET,OPTIONS"
 	MatchMethod string `json:"match-method"`
+
+	// gnerate-secret-account determain if the operator will create a service account and
+	// delever the actual service account token instead of a JWT access key.
+	// the service account will be generated not before the token is valid
+	// and will be deleted when the token expires.
+	// Defalut value is false.
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="boolean"
+	// +kubebuilder:default:=false
+	GenerateServiceAccount bool `json:"gnerate-secret-account,omitempty"`
 }
 
 // GateTokenStatus defines the observed state of GateToken
@@ -88,10 +99,13 @@ type GateTokenStatus struct {
 	// The generated token
 	Token string `json:"token"`
 
+	// The generated service account name
+	ServiceAccountName string `json:"service-account-name"`
+
 	// Cached data, once created, user can not change this valuse
 	Data GateTokenCache `json:"data"`
 
-	// Token generation phase (ready|error)
+	// Token generation phase (pending|ready|expired|error)
 	Phase string `json:"phase"`
 }
 
