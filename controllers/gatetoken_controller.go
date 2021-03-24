@@ -18,19 +18,13 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
@@ -58,7 +52,7 @@ type GateTokenReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("gatetoken", req.NamespacedName)
+	r.Log.Info("Reconcile", "gatetoken", req.NamespacedName)
 
 	// your logic here
 
@@ -75,6 +69,57 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// Error reading the object - requeue the request.
 		r.Log.Error(err, "Failed to get GateToken.")
 		return ctrl.Result{}, err
+	}
+
+	// If token in pending state, check nbf
+	if token.Status.Phase == "Pending" {
+		now := int64(time.Now().Unix())
+		exp := token.Status.Data.Exp
+		nbf := token.Status.Data.NBf
+
+		r.Log.Info("Pending phase token", "id", token.Name, "now", now, "nbf", nbf, "exp", exp)
+
+		if (nbf - now) > 0 {
+			r.Log.Info("Pending RequeueAfter", "sec", (nbf - now))
+			return ctrl.Result{
+				RequeueAfter: time.Duration(nbf-now) * time.Second,
+			}, nil
+		}
+
+		// If token is ready, create sideeffects
+		// and set phase to ready
+
+		setReadyCondition(token, "Ready", "Token is ready")
+
+		if err := r.Status().Update(ctx, token); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
+		return ctrl.Result{}, nil
+	}
+
+	// If token in ready state, check expiration
+	if token.Status.Phase == "Ready" {
+		now := int64(time.Now().Unix())
+		exp := token.Status.Data.Exp
+
+		r.Log.Info("Ready phase token", "id", token.Name, "now", now, "exp", exp)
+
+		if (exp - now) > 0 {
+			r.Log.Info("Ready RequeueAfter", "sec", (exp - now))
+			return ctrl.Result{
+				RequeueAfter: time.Duration(exp-now) * time.Second,
+			}, nil
+		}
+
+		// If token expired, delete sideeffects
+		// and set phase to completed
+
+		setCompletedCondition(token, "Expired", "Token expired")
+
+		if err := r.Status().Update(ctx, token); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
+		return ctrl.Result{}, nil
 	}
 
 	// If token was created, exit.
@@ -122,7 +167,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Token is ready
-	setReadyCondition(token, "TokenCreated", "token created")
+	setPendingCondition(token, "TokenCreated", "Token created")
 	if err := r.Status().Update(ctx, token); err != nil {
 		r.Log.Info("Failed to update status", "err", err)
 	}
@@ -134,96 +179,4 @@ func (r *GateTokenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&ocgatev1beta1.GateToken{}).
 		Complete(r)
-}
-
-// Cache user data
-func cacheData(token *ocgatev1beta1.GateToken) error {
-	var nbf int64
-
-	if token.Spec.From == "" {
-		nbf = int64(time.Now().Unix())
-	} else {
-		t, err := time.Parse(time.RFC3339, token.Spec.From)
-		if err != nil {
-			return err
-		}
-		nbf = int64(t.Unix())
-	}
-
-	token.Status.Data = ocgatev1beta1.GateTokenCache{
-		NBf:         nbf,
-		Exp:         nbf + int64(token.Spec.DurationSec),
-		From:        token.Spec.From,
-		Until:       time.Unix(nbf+int64(token.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
-		DurationSec: token.Spec.DurationSec,
-		MatchMethod: token.Spec.MatchMethod,
-		MatchPath:   token.Spec.MatchPath,
-		Alg:         jwt.SigningMethodRS256.Name,
-	}
-
-	return nil
-}
-
-func getSecret(ctx context.Context, client client.Client, name string, namespace string) ([]byte, error) {
-	// Get private key secret
-	secret := &corev1.Secret{}
-	namespaced := &types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	if err := client.Get(ctx, *namespaced, secret); err != nil {
-		return nil, err
-	}
-
-	key := secret.Data["key.pem"]
-	return key, nil
-}
-
-func setErrorCondition(token *ocgatev1beta1.GateToken, reason string, err error) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Error"
-	condition := metav1.Condition{
-		Type:               "Error",
-		Status:             "True",
-		Reason:             reason,
-		Message:            fmt.Sprintf("%s", err),
-		LastTransitionTime: t,
-	}
-	token.Status.Conditions = []metav1.Condition{condition}
-}
-
-func setReadyCondition(token *ocgatev1beta1.GateToken, reason string, message string) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Ready"
-	condition := metav1.Condition{
-		Type:               "Ready",
-		Status:             "True",
-		Reason:             reason,
-		Message:            message,
-		LastTransitionTime: t,
-	}
-	token.Status.Conditions = []metav1.Condition{condition}
-}
-
-func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
-	// Create token
-	claims := &jwt.MapClaims{
-		"exp":         token.Status.Data.Exp,
-		"nbf":         token.Status.Data.NBf,
-		"matchPath":   token.Status.Data.MatchPath,
-		"matchMethod": token.Status.Data.MatchMethod,
-	}
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	jwtKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
-	if err != nil {
-		return err
-	}
-	out, err := jwtToken.SignedString(jwtKey)
-	if err != nil {
-		return err
-	}
-
-	token.Status.Token = out
-	return nil
 }

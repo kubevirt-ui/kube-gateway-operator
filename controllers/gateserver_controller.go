@@ -73,7 +73,7 @@ type GateServerReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("gateserver", req.NamespacedName)
+	r.Log.Info("Reconcile", "gateserver", req.NamespacedName)
 
 	// your logic here
 
