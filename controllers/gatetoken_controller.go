@@ -97,29 +97,26 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			r.Log.Info("Create namespaced service account.")
 			sa, _ := r.serviceaccount(token)
 			if err := r.Client.Create(ctx, sa); err != nil {
-				r.Log.Info("Pending RequeueAfter", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(nbf-now) * time.Second,
-				}, nil
+				r.Log.Info("Failed to create serviceaccount", "err", err)
+				return ctrl.Result{}, nil
 			}
 
 			role, _ := r.role(token)
 			if err := r.Client.Create(ctx, role); err != nil {
-				r.Log.Info("Pending RequeueAfter", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(nbf-now) * time.Second,
-				}, nil
+				r.Log.Info("Failed to create role", "err", err)
+				return ctrl.Result{}, nil
 			}
 
 			rolebinding, _ := r.rolebinding(token)
 			if err := r.Client.Create(ctx, rolebinding); err != nil {
-				r.Log.Info("Pending RequeueAfter", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(nbf-now) * time.Second,
-				}, nil
+				r.Log.Info("Failed to create rolebinding", "err", err)
+				return ctrl.Result{}, nil
 			}
 		}
 
+		// TODO: reque until token secret is available
+
+		// If token is found, move to Ready
 		setReadyCondition(token, "Ready", "Token is ready")
 
 		if err := r.Status().Update(ctx, token); err != nil {
@@ -159,9 +156,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 			if err := r.Delete(ctx, sa, opts); err != nil {
 				r.Log.Info("Failed to delete service account", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(exp-now) * time.Second,
-				}, nil
+				return ctrl.Result{}, nil
 			}
 
 			role := &rbacv1.Role{
@@ -173,9 +168,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 			if err := r.Delete(ctx, role, opts); err != nil {
 				r.Log.Info("Failed to delete role", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(exp-now) * time.Second,
-				}, nil
+				return ctrl.Result{}, nil
 			}
 
 			roleBinding := &rbacv1.RoleBinding{
@@ -186,9 +179,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			}
 			if err := r.Delete(ctx, roleBinding, opts); err != nil {
 				r.Log.Info("Failed to delete roleBinding", "err", err)
-				return ctrl.Result{
-					RequeueAfter: time.Duration(exp-now) * time.Second,
-				}, nil
+				return ctrl.Result{}, nil
 			}
 		}
 
