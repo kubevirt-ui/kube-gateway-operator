@@ -59,7 +59,7 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 	return nil
 }
 
-func getSecret(ctx context.Context, client client.Client, name string, namespace string) ([]byte, error) {
+func getSecret(ctx context.Context, client client.Client, name string, namespace string, secretName string) ([]byte, error) {
 	// Get private key secret
 	secret := &corev1.Secret{}
 	namespaced := &types.NamespacedName{
@@ -71,7 +71,7 @@ func getSecret(ctx context.Context, client client.Client, name string, namespace
 		return nil, err
 	}
 
-	key := secret.Data["key.pem"]
+	key := secret.Data[secretName]
 	return key, nil
 }
 

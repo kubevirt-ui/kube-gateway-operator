@@ -17,8 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"strings"
-
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1 "k8s.io/api/core/v1"
@@ -55,13 +53,7 @@ func (r *GateTokenReconciler) role(s *ocgatev1beta1.GateToken) (*rbacv1.Role, er
 	}
 
 	// Set verbs
-	if strings.Contains(strings.ToUpper(s.Spec.MatchMethod), "POST") ||
-		strings.Contains(strings.ToUpper(s.Spec.MatchMethod), "PUT") ||
-		strings.Contains(strings.ToUpper(s.Spec.MatchMethod), "DELETE") {
-		verbs = []string{"get", "list", "watch", "create", "delete", "patch", "update"}
-	} else {
-		verbs = []string{"get", "list", "watch"}
-	}
+	verbs = []string{"get", "list", "watch"}
 
 	// Set resource
 	// TODO: parse s.Spec.MatchPath and set currectly

@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -114,15 +116,59 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			}
 		}
 
-		// TODO: reque until token secret is available
-
 		// If token is found, move to Ready
 		setReadyCondition(token, "Ready", "Token is ready")
 
 		if err := r.Status().Update(ctx, token); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
-		return ctrl.Result{}, nil
+
+		// Reques, wating for token.
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+
+	// If token in ready state and missing token, reque
+	if token.Status.Phase == "Ready" && token.Status.Token == "" && token.Spec.GenerateServiceAccount {
+		sa := &corev1.ServiceAccount{}
+		if err := r.Get(ctx, req.NamespacedName, sa); err != nil {
+			if errors.IsNotFound(err) {
+				// Request object not found, could have been deleted after reconcile request.
+				// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+				// Return and don't requeue
+				r.Log.Info("Service account resource not found. Ignoring since object must be deleted.")
+				return ctrl.Result{}, nil
+			}
+			// Error reading the object - requeue the request.
+			r.Log.Error(err, "Failed to get ServiceAccount.")
+			return ctrl.Result{}, err
+		}
+
+		secretPrefix := fmt.Sprintf("%s-token-", token.Name)
+		secretName := ""
+		for _, s := range sa.Secrets {
+			if strings.HasPrefix(s.Name, secretPrefix) {
+				secretName = s.Name
+			}
+		}
+
+		// Reque until token secret is available
+		r.Log.Info("Reading token", "secretName", secretName)
+		key, err := getSecret(ctx, r.Client, secretName, token.Namespace, "token")
+		if err != nil {
+			r.Log.Info("Can't read service account token", "err", err)
+
+			setErrorCondition(token, "TokenGetterError", err)
+			if err := r.Status().Update(ctx, token); err != nil {
+				r.Log.Info("Failed to update status", "err", err)
+			}
+
+			return ctrl.Result{}, nil
+		}
+
+		token.Status.Token = string(key)
+		if err := r.Status().Update(ctx, token); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
 	}
 
 	// If token in ready state, check expiration
@@ -209,30 +255,33 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
+	// Set gate-token access code
 	// Get private key secret
-	key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", token.Namespace)
-	if err != nil {
-		r.Log.Info("Can't read private key secret", "err", err)
+	if !token.Spec.GenerateServiceAccount {
+		key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", token.Namespace, "key.pem")
+		if err != nil {
+			r.Log.Info("Can't read private key secret", "err", err)
 
-		setErrorCondition(token, "PrivateKeyError", err)
-		if err := r.Status().Update(ctx, token); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
+			setErrorCondition(token, "PrivateKeyError", err)
+			if err := r.Status().Update(ctx, token); err != nil {
+				r.Log.Info("Failed to update status", "err", err)
+			}
+
+			return ctrl.Result{}, nil
 		}
 
-		return ctrl.Result{}, nil
-	}
+		// Create token
+		err = singToken(token, key)
+		if err != nil {
+			r.Log.Info("Can't read private key secret", "err", err)
 
-	// Create token
-	err = singToken(token, key)
-	if err != nil {
-		r.Log.Info("Can't read private key secret", "err", err)
+			setErrorCondition(token, "PrivateKeyError", err)
+			if err := r.Status().Update(ctx, token); err != nil {
+				r.Log.Info("Failed to update status", "err", err)
+			}
 
-		setErrorCondition(token, "PrivateKeyError", err)
-		if err := r.Status().Update(ctx, token); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
+			return ctrl.Result{}, nil
 		}
-
-		return ctrl.Result{}, nil
 	}
 
 	// Token is ready
