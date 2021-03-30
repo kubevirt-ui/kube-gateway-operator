@@ -17,8 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"strings"
-
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -27,22 +25,8 @@ import (
 )
 
 func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRole, error) {
-	var verbs []string
-	var resources []string
-
 	labels := map[string]string{
 		"app": s.Name,
-	}
-
-	if s.Spec.AdminRole == "admin" {
-		verbs = []string{"get", "list", "watch", "create", "delete", "patch", "update"}
-	} else {
-		verbs = []string{"get", "list", "watch"}
-	}
-	if s.Spec.AdminResources == "" {
-		resources = []string{"*"}
-	} else {
-		resources = strings.Split(s.Spec.AdminResources, ",")
 	}
 
 	role := &rbacv1.ClusterRole{
@@ -52,9 +36,11 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
-				APIGroups: []string{"*"},
-				Resources: resources,
-				Verbs:     verbs,
+				Verbs:           s.Spec.ServiceAccountVerbs,
+				APIGroups:       s.Spec.ServiceAccountAPIGroups,
+				Resources:       s.Spec.ServiceAccountResources,
+				ResourceNames:   s.Spec.ServiceAccountResourceNames,
+				NonResourceURLs: s.Spec.ServiceAccountNonResourceURLs,
 			},
 		},
 	}

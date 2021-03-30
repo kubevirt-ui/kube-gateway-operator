@@ -118,13 +118,14 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		// If token is found, move to Ready
 		setReadyCondition(token, "Ready", "Token is ready")
-
 		if err := r.Status().Update(ctx, token); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 
-		// Reques, wating for token.
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		// If using k8s to generate the token, reques and wait for token.
+		if token.Spec.GenerateServiceAccount {
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
 	}
 
 	// If token in ready state and missing token, reque

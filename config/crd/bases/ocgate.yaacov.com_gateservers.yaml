@@ -36,38 +36,15 @@ spec:
           spec:
             description: GateServerSpec defines the desired state of GateServer
             properties:
-              admin-namespaced:
-                default: false
-                description: admin-namespaced determain if the athorization role of
-                  the service is namespaced. Defalut value is false.
-                type: boolean
-              admin-resources:
-                default: ""
-                description: admin-resources is a comma separated list of resources
-                  athorization role of the service, if left empty service could access
-                  any resource. Defalut value is "".
-                maxLength: 1024
-                type: string
-              admin-role:
-                default: reader
-                description: admin-role is the verbs athorization role of the service
-                  (reader/admin) if service is role is reader, clients getting tokens
-                  to use this service will be able to excute get, watch and list verbs.
-                  if service is role is admin, clients getting tokens to use this
-                  service will be able to excute get, watch, list, patch, creat and
-                  delete verbs. Defalut value is "reader".
-                maxLength: 1024
-                pattern: ^(reader|admin)$
-                type: string
-              api-url:
+              apiURL:
                 default: https://kubernetes.default.svc
-                description: api-url is the k8s API url. Defalut value is "https://kubernetes.default.svc".
+                description: apiURL is the k8s API url. Defalut value is "https://kubernetes.default.svc".
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
-              gnerate-secret:
+              gnerateSecret:
                 default: true
-                description: gnerate-secret determain if a secrete with public and
+                description: gnerateSecret determain if a secrete with public and
                   private kes will be automatically generated when the oc-gate server
                   is created. Defalut value is true.
                 type: boolean
@@ -77,9 +54,9 @@ spec:
                   is "quay.io/yaacov/oc-gate:latest".
                 maxLength: 1024
                 type: string
-              passthrough:
+              passThrough:
                 default: false
-                description: passthrough determain if the tokens acquired from OAuth2
+                description: passThrough determain if the tokens acquired from OAuth2
                   server directly to k8s API. Defalut value is false.
                 type: boolean
               route:
@@ -87,9 +64,66 @@ spec:
                 maxLength: 226
                 pattern: ^([a-z0-9-_])+[.]([a-z0-9-_])+[.]([a-z0-9-._])+$
                 type: string
-              web-app-image:
+              serviceAccountAPIGroups:
+                description: serviceAccountAPIGroups is the name of the APIGroup that
+                  contains the resources. If multiple API groups are specified, any
+                  action requested against one of the enumerated resources in any
+                  API group will be allowed. APIGroups is the name of the APIGroup
+                  that contains the resources. If multiple API groups are specified,
+                  any action requested against one of the enumerated resources in
+                  any API group will be allowed. Defalut value is [].
+                items:
+                  type: string
+                type: array
+              serviceAccountNonResourceURLs:
+                description: serviceAccountNonResourceURLs is a set of partial urls
+                  that a user should have access to.  *s are allowed, but only as
+                  the full, final step in the path If an action is not a resource
+                  API request, then the URL is split on '/' and is checked against
+                  the NonResourceURLs to look for a match. Since non-resource URLs
+                  are not namespaced, this field is only applicable for ClusterRoles
+                  referenced from a ClusterRoleBinding. Rules can either apply to
+                  API resources (such as "pods" or "secrets") or non-resource URL
+                  paths (such as "/api"),  but not both. APIGroups is the name of
+                  the APIGroup that contains the resources. If multiple API groups
+                  are specified, any action requested against one of the enumerated
+                  resources in any API group will be allowed. Defalut value is [].
+                items:
+                  type: string
+                type: array
+              serviceAccountResourceNames:
+                description: serviceAccountResourceNames is an optional white list
+                  of names that the rule applies to.  An empty set means that everything
+                  is allowed. APIGroups is the name of the APIGroup that contains
+                  the resources. If multiple API groups are specified, any action
+                  requested against one of the enumerated resources in any API group
+                  will be allowed. Defalut value is [].
+                items:
+                  type: string
+                type: array
+              serviceAccountResources:
+                description: serviceAccountResources is a list of resources this rule
+                  applies to.  '*' represents all resources in the specified apiGroups.
+                  '*/foo' represents the subresource 'foo' for all resources in the
+                  specified apiGroups. APIGroups is the name of the APIGroup that
+                  contains the resources. If multiple API groups are specified, any
+                  action requested against one of the enumerated resources in any
+                  API group will be allowed. Defalut value is [].
+                items:
+                  type: string
+                type: array
+              serviceAccountVerbs:
+                default:
+                - get
+                description: serviceAccountVerbs is a list of Verbs that apply to
+                  ALL the ResourceKinds and AttributeRestrictions contained in this
+                  rule. VerbAll represents all kinds. Defalut value is ["get"].
+                items:
+                  type: string
+                type: array
+              webAppImage:
                 default: ""
-                description: web-app-image is the oc gate proxy web application image
+                description: webAppImage is the oc gate proxy web application image
                   to use, It's an image including the static web application to be
                   served together with k8s API. The static web application should
                   be in the directory "/data/web/public/" and it will be copied to

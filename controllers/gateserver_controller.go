@@ -164,37 +164,32 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 	// resources that are not owned by this CR, like a PVC.
 
 	ctx := context.Background()
+	opts := &client.DeleteOptions{}
 
-	// If not namespaces, then check and delete named cluster role.
-	if !s.Spec.AdminNamespaced {
-		r.Log.Info("Deleting cluster role and cluster role binding...")
+	r.Log.Info("Deleting cluster role and cluster role binding...")
 
-		opts := &client.DeleteOptions{}
+	clusterRole := &rbacv1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+		},
+	}
 
-		clusterRole := &rbacv1.ClusterRole{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: s.Name,
-			},
-		}
+	if err := r.Delete(ctx, clusterRole, opts); err != nil {
+		r.Log.Info("Failed to finalize gateserver", "err", err)
+		return nil
+	}
 
-		if err := r.Delete(ctx, clusterRole, opts); err != nil {
-			r.Log.Info("Failed to finalize gateserver", "err", err)
-			return nil
-		}
-
-		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: s.Name,
-			},
-		}
-		if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
-			r.Log.Info("Failed to finalize gateserver", "err", err)
-			return nil
-		}
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+		},
+	}
+	if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
+		r.Log.Info("Failed to finalize gateserver", "err", err)
+		return nil
 	}
 
 	r.Log.Info("Deleting oauthclient...")
-	opts := &client.DeleteOptions{}
 	oauthclient := &oauthv1.OAuthClient{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.Name,

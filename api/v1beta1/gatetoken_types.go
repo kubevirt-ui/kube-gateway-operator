@@ -25,30 +25,23 @@ import (
 
 // GateTokenCache stores initial token data
 type GateTokenCache struct {
-	From        string `json:"from"`
-	Until       string `json:"until"`
-	DurationSec int64  `json:"duration-sec"`
-	NBf         int64  `json:"nbf"`
-	Exp         int64  `json:"exp"`
-	MatchMethod string `json:"matchMethod"`
-	MatchPath   string `json:"matchPath"`
-	Alg         string `json:"alg"`
+	From            string   `json:"from"`
+	Until           string   `json:"until"`
+	DurationSec     int64    `json:"duration-sec"`
+	NBf             int64    `json:"nbf"`
+	Exp             int64    `json:"exp"`
+	Alg             string   `json:"alg"`
+	Verbs           []string `json:"verbs,omitempty"`
+	APIGroups       []string `json:"APIGroups,omitempty"`
+	Resources       []string `json:"resources,omitempty"`
+	ResourceNames   []string `json:"resourceNames,omitempty"`
+	NonResourceURLs []string `json:"nonResourceURLs,omitempty"`
 }
 
 // GateTokenSpec defines the desired state of GateToken
 type GateTokenSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// match-path is a regular expresion used to validate API request path,
-	// API requests matching this pattern will be validated by the token.
-	// This field may not be empty.
-	// +required
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^[/^][^:@]+$"
-	// +kubebuilder:validation:MaxLength=1024
-	MatchPath string `json:"match-path"`
 
 	// from is time of token invocation, the token will not validate before this time,
 	// the token duration will start from this time.
@@ -58,25 +51,15 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:Format="date-time"
 	From string `json:"from"`
 
-	// duration-sec is the duration in sec the token will be validated since it's invocation.
+	// durationSec is the duration in sec the token will be validated since it's invocation.
 	// Defalut value is 3600s (1h).
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="integer"
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default:=3600
-	DurationSec int64 `json:"duration-sec"`
+	DurationSec int64 `json:"durationSec"`
 
-	// match-path is a comma separated list of allowed http methods,
-	// only API requests matching one of the allowed methods will be validated.
-	// Defalut value is "GET,OPTIONS".
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+(,(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+)*$"
-	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:="GET,OPTIONS"
-	MatchMethod string `json:"match-method"`
-
-	// gnerate-secret-account determain if the operator will create a service account and
+	// gnerateServiceAccount determain if the operator will create a service account and
 	// delever the actual service account token instead of a JWT access key.
 	// the service account will be generated not before the token is valid
 	// and will be deleted when the token expires.
@@ -85,7 +68,51 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
-	GenerateServiceAccount bool `json:"gnerate-secret-account,omitempty"`
+	GenerateServiceAccount bool `json:"gnerateServiceAccount,omitempty"`
+
+	// verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule.  VerbAll represents all kinds.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is ["get"].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"get"}
+	Verbs []string `json:"verbs,omitempty"`
+
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	APIGroups []string `json:"APIGroups,omitempty"`
+
+	// resources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups.
+	// '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	Resources []string `json:"resources,omitempty"`
+
+	// resourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	ResourceNames []string `json:"resourceNames,omitempty"`
+
+	// nonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path
+	// If an action is not a resource API request, then the URL is split on '/' and is checked against the NonResourceURLs to look for a match.
+	// Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding.
+	// Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	NonResourceURLs []string `json:"nonResourceURLs,omitempty"`
 }
 
 // GateTokenStatus defines the observed state of GateToken

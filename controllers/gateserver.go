@@ -59,28 +59,15 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		return err
 	}
 
-	if s.Spec.AdminNamespaced {
-		r.Log.Info("Create namespaced role.")
-		role, _ := r.role(s)
-		if err := r.Client.Create(ctx, role); err != nil {
-			return err
-		}
+	r.Log.Info("Create cluster role.")
+	role, _ := r.clusterrole(s)
+	if err := r.Client.Create(ctx, role); err != nil {
+		return err
+	}
 
-		rolebinding, _ := r.rolebinding(s)
-		if err := r.Client.Create(ctx, rolebinding); err != nil {
-			return err
-		}
-	} else {
-		r.Log.Info("Create cluster role.")
-		role, _ := r.clusterrole(s)
-		if err := r.Client.Create(ctx, role); err != nil {
-			return err
-		}
-
-		rolebinding, _ := r.clusterrolebinding(s)
-		if err := r.Client.Create(ctx, rolebinding); err != nil {
-			return err
-		}
+	rolebinding, _ := r.clusterrolebinding(s)
+	if err := r.Client.Create(ctx, rolebinding); err != nil {
+		return err
 	}
 
 	// Create the JWT secret

@@ -28,14 +28,14 @@ type GateServerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// api-url is the k8s API url.
+	// apiURL is the k8s API url.
 	// Defalut value is "https://kubernetes.default.svc".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:Pattern="^(http|https)://.*"
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:="https://kubernetes.default.svc"
-	APIURL string `json:"api-url,omitempty"`
+	APIURL string `json:"apiURL,omitempty"`
 
 	// route is the the gate proxy server.
 	// +required
@@ -45,43 +45,58 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:MaxLength=226
 	Route string `json:"route,omitempty"`
 
-	// admin-role is the verbs athorization role of the service (reader/admin)
-	// if service is role is reader, clients getting tokens to use this service
-	// will be able to excute get, watch and list verbs.
-	// if service is role is admin, clients getting tokens to use this service
-	// will be able to excute get, watch, list, patch, creat and delete verbs.
-	// Defalut value is "reader".
+	// serviceAccountVerbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule.
+	// VerbAll represents all kinds.
+	// Defalut value is ["get"].
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^(reader|admin)$"
-	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:="reader"
-	AdminRole string `json:"admin-role,omitempty"`
+	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"get"}
+	ServiceAccountVerbs []string `json:"serviceAccountVerbs,omitempty"`
 
-	// admin-resources is a comma separated list of resources athorization role of the service,
-	// if left empty service could access any resource.
-	// Defalut value is "".
+	// serviceAccountAPIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:=""
-	AdminResources string `json:"admin-resources,omitempty"`
+	// +kubebuilder:validation:Type="array"
+	ServiceAccountAPIGroups []string `json:"serviceAccountAPIGroups,omitempty"`
 
-	// admin-namespaced determain if the athorization role of the service is namespaced.
+	// serviceAccountResources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups.
+	// '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	ServiceAccountResources []string `json:"serviceAccountResources,omitempty"`
+
+	// serviceAccountResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	ServiceAccountResourceNames []string `json:"serviceAccountResourceNames,omitempty"`
+
+	// serviceAccountNonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path
+	// If an action is not a resource API request, then the URL is split on '/' and is checked against the NonResourceURLs to look for a match.
+	// Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding.
+	// Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
+	// APIGroups is the name of the APIGroup that contains the resources.
+	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
+	// Defalut value is [].
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="array"
+	ServiceAccountNonResourceURLs []string `json:"serviceAccountNonResourceURLs,omitempty"`
+
+	// passThrough determain if the tokens acquired from OAuth2 server directly to k8s API.
 	// Defalut value is false.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
-	AdminNamespaced bool `json:"admin-namespaced,omitempty"`
-
-	// passthrough determain if the tokens acquired from OAuth2 server directly to k8s API.
-	// Defalut value is false.
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="boolean"
-	// +kubebuilder:default:=false
-	PassThrough bool `json:"passthrough,omitempty"`
+	PassThrough bool `json:"passThrough,omitempty"`
 
 	// image is the oc gate proxy image to use.
 	// Defalut value is "quay.io/yaacov/oc-gate:latest".
@@ -91,7 +106,7 @@ type GateServerSpec struct {
 	// +kubebuilder:default:="quay.io/yaacov/oc-gate:latest"
 	Image string `json:"image,omitempty"`
 
-	// web-app-image is the oc gate proxy web application image to use,
+	// webAppImage is the oc gate proxy web application image to use,
 	// It's an image including the static web application to be served together
 	// with k8s API.
 	// The static web application should be in the directory "/data/web/public/"
@@ -102,16 +117,16 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:=""
-	WebAppImage string `json:"web-app-image,omitempty"`
+	WebAppImage string `json:"webAppImage,omitempty"`
 
-	// gnerate-secret determain if a secrete with public and private kes will be automatically
+	// gnerateSecret determain if a secrete with public and private kes will be automatically
 	// generated when the oc-gate server is created.
 	// Defalut value is true.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=true
-	GenerateSecret bool `json:"gnerate-secret,omitempty"`
+	GenerateSecret bool `json:"gnerateSecret,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer

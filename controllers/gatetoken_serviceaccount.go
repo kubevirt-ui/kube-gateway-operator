@@ -35,7 +35,8 @@ func (r *GateTokenReconciler) serviceaccount(s *ocgatev1beta1.GateToken) (*corev
 		ObjectMeta: metav1.ObjectMeta{Name: s.Name, Namespace: s.Namespace, Labels: labels},
 		Secrets: []corev1.ObjectReference{
 			{
-				Name: s.Name, Namespace: s.Namespace,
+				Name:      s.Name,
+				Namespace: s.Namespace,
 			},
 		},
 	}
@@ -45,19 +46,9 @@ func (r *GateTokenReconciler) serviceaccount(s *ocgatev1beta1.GateToken) (*corev
 }
 
 func (r *GateTokenReconciler) role(s *ocgatev1beta1.GateToken) (*rbacv1.Role, error) {
-	var verbs []string
-	var resources []string
-
 	labels := map[string]string{
 		"app": s.Name,
 	}
-
-	// Set verbs
-	verbs = []string{"get", "list", "watch"}
-
-	// Set resource
-	// TODO: parse s.Spec.MatchPath and set currectly
-	resources = []string{"*"}
 
 	role := &rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{
@@ -67,9 +58,11 @@ func (r *GateTokenReconciler) role(s *ocgatev1beta1.GateToken) (*rbacv1.Role, er
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
-				APIGroups: []string{"*"},
-				Resources: resources,
-				Verbs:     verbs,
+				Verbs:           s.Spec.Verbs,
+				APIGroups:       s.Spec.APIGroups,
+				Resources:       s.Spec.Resources,
+				ResourceNames:   s.Spec.ResourceNames,
+				NonResourceURLs: s.Spec.NonResourceURLs,
 			},
 		},
 	}

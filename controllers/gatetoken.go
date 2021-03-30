@@ -46,14 +46,17 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 	}
 
 	token.Status.Data = ocgatev1beta1.GateTokenCache{
-		NBf:         nbf,
-		Exp:         nbf + int64(token.Spec.DurationSec),
-		From:        token.Spec.From,
-		Until:       time.Unix(nbf+int64(token.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
-		DurationSec: token.Spec.DurationSec,
-		MatchMethod: token.Spec.MatchMethod,
-		MatchPath:   token.Spec.MatchPath,
-		Alg:         jwt.SigningMethodRS256.Name,
+		From:            token.Spec.From,
+		Until:           time.Unix(nbf+int64(token.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
+		DurationSec:     token.Spec.DurationSec,
+		NBf:             nbf,
+		Exp:             nbf + int64(token.Spec.DurationSec),
+		Alg:             jwt.SigningMethodRS256.Name,
+		Verbs:           token.Spec.Verbs,
+		APIGroups:       token.Spec.APIGroups,
+		Resources:       token.Spec.Resources,
+		ResourceNames:   token.Spec.ResourceNames,
+		NonResourceURLs: token.Spec.NonResourceURLs,
 	}
 
 	return nil
@@ -130,10 +133,13 @@ func setCompletedCondition(token *ocgatev1beta1.GateToken, reason string, messag
 func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
 	// Create token
 	claims := &jwt.MapClaims{
-		"exp":         token.Status.Data.Exp,
-		"nbf":         token.Status.Data.NBf,
-		"matchPath":   token.Status.Data.MatchPath,
-		"matchMethod": token.Status.Data.MatchMethod,
+		"exp":             token.Status.Data.Exp,
+		"nbf":             token.Status.Data.NBf,
+		"verbs":           token.Status.Data.Verbs,
+		"apiGroups":       token.Status.Data.APIGroups,
+		"resources":       token.Status.Data.Resources,
+		"resourceNames":   token.Status.Data.ResourceNames,
+		"nonResourceURLs": token.Status.Data.NonResourceURLs,
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwtKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
