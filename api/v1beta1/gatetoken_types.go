@@ -31,6 +31,7 @@ type GateTokenCache struct {
 	NBf             int64    `json:"nbf"`
 	Exp             int64    `json:"exp"`
 	Alg             string   `json:"alg"`
+	Namespace       string   `json:"namespace,omitempty"`
 	Verbs           []string `json:"verbs,omitempty"`
 	APIGroups       []string `json:"APIGroups,omitempty"`
 	Resources       []string `json:"resources,omitempty"`
@@ -69,6 +70,13 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
 	GenerateServiceAccount bool `json:"generateServiceAccount,omitempty"`
+
+	// namespace of the rule. "*" represents all namespaces.
+	// Defalut value is "*".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:default:="*"
+	Namespace string `json:"namespace,omitempty"`
 
 	// verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule.  VerbAll represents all kinds.
 	// APIGroups is the name of the APIGroup that contains the resources.

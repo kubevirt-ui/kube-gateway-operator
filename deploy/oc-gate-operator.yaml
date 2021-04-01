@@ -211,6 +211,10 @@ spec:
                 default: false
                 description: generateServiceAccount determain if the operator will create a service account and delever the actual service account token instead of a JWT access key. the service account will be generated not before the token is valid and will be deleted when the token expires. Defalut value is false.
                 type: boolean
+              namespace:
+                default: '*'
+                description: namespace of the rule. "*" represents all namespaces. Defalut value is "*".
+                type: string
               nonResourceURLs:
                 description: nonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path If an action is not a resource API request, then the URL is split on '/' and is checked against the NonResourceURLs to look for a match. Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding. Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [].
                 items:
@@ -297,6 +301,8 @@ spec:
                     format: int64
                     type: integer
                   from:
+                    type: string
+                  namespace:
                     type: string
                   nbf:
                     format: int64
@@ -723,7 +729,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/oc-gate-operator@sha256:e8602a79830d1d97d2e2e1b51e3d0ef14a58a621f051c6fed223b27c01cc8304
+        image: quay.io/yaacov/oc-gate-operator@sha256:ff2f8e3a3b456d3ebd85ef7a203021156ea8aa9a65a3bad7db9fa142e6aa4a77
         livenessProbe:
           httpGet:
             path: /healthz

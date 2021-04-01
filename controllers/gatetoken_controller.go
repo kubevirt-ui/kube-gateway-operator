@@ -138,10 +138,18 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 				errs = append(errs, err)
 			}
 
-			rolebinding, _ := r.clusterrolebinding(token)
-			if err := r.Client.Create(ctx, rolebinding); err != nil {
-				r.Log.Info("Failed to create rolebinding", "err", err)
-				errs = append(errs, err)
+			if token.Spec.Namespace == "*" {
+				rolebinding, _ := r.clusterrolebinding(token)
+				if err := r.Client.Create(ctx, rolebinding); err != nil {
+					r.Log.Info("Failed to create clusterrolebinding", "err", err)
+					errs = append(errs, err)
+				}
+			} else {
+				rolebinding, _ := r.rolebinding(token)
+				if err := r.Client.Create(ctx, rolebinding); err != nil {
+					r.Log.Info("Failed to create rolebinding", "err", err)
+					errs = append(errs, err)
+				}
 			}
 		}
 
@@ -254,14 +262,27 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 				errs = append(errs, err)
 			}
 
-			roleBinding := &rbacv1.ClusterRoleBinding{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: token.Name,
-				},
-			}
-			if err := r.Delete(ctx, roleBinding, opts); err != nil {
-				r.Log.Info("Failed to delete roleBinding", "err", err)
-				errs = append(errs, err)
+			if token.Spec.Namespace == "*" {
+				roleBinding := &rbacv1.ClusterRoleBinding{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: token.Name,
+					},
+				}
+				if err := r.Delete(ctx, roleBinding, opts); err != nil {
+					r.Log.Info("Failed to delete clusterRoleBinding", "err", err)
+					errs = append(errs, err)
+				}
+			} else {
+				roleBinding := &rbacv1.RoleBinding{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      token.Name,
+						Namespace: token.Spec.Namespace,
+					},
+				}
+				if err := r.Delete(ctx, roleBinding, opts); err != nil {
+					r.Log.Info("Failed to delete roleBinding", "err", err)
+					errs = append(errs, err)
+				}
 			}
 
 			if len(errs) != 0 {
@@ -385,14 +406,16 @@ func (r *GateTokenReconciler) finalizeGateToken(s *ocgatev1beta1.GateToken) erro
 		errs = append(errs, err)
 	}
 
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: s.Name,
-		},
-	}
-	if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
-		r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
-		errs = append(errs, err)
+	if s.Spec.Namespace == "*" {
+		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: s.Name,
+			},
+		}
+		if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
+			r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
+			errs = append(errs, err)
+		}
 	}
 
 	if len(errs) != 0 {

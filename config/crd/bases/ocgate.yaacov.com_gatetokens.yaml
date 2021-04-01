@@ -65,6 +65,11 @@ spec:
                   not before the token is valid and will be deleted when the token
                   expires. Defalut value is false.
                 type: boolean
+              namespace:
+                default: '*'
+                description: namespace of the rule. "*" represents all namespaces.
+                  Defalut value is "*".
+                type: string
               nonResourceURLs:
                 description: nonResourceURLs is a set of partial urls that a user
                   should have access to.  *s are allowed, but only as the full, final
@@ -205,6 +210,8 @@ spec:
                     format: int64
                     type: integer
                   from:
+                    type: string
+                  namespace:
                     type: string
                   nbf:
                     format: int64

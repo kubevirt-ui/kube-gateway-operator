@@ -97,3 +97,33 @@ func (r *GateTokenReconciler) clusterrolebinding(s *ocgatev1beta1.GateToken) (*r
 
 	return rolebinding, nil
 }
+
+func (r *GateTokenReconciler) rolebinding(s *ocgatev1beta1.GateToken) (*rbacv1.RoleBinding, error) {
+	labels := map[string]string{
+		"app": s.Name,
+	}
+
+	rolebinding := &rbacv1.RoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+			// Bind clusterRole only the the namespace requested by token spec
+			Namespace: s.Spec.Namespace,
+			Labels:    labels,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Namespace: s.Namespace,
+				Name:      s.Name,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     s.Name,
+		},
+	}
+	controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
+
+	return rolebinding, nil
+}

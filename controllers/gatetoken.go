@@ -53,6 +53,7 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 		NBf:             nbf,
 		Exp:             nbf + int64(token.Spec.DurationSec),
 		Alg:             jwt.SigningMethodRS256.Name,
+		Namespace:       token.Spec.Namespace,
 		Verbs:           token.Spec.Verbs,
 		APIGroups:       token.Spec.APIGroups,
 		Resources:       token.Spec.Resources,
@@ -136,6 +137,7 @@ func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
 	claims := &jwt.MapClaims{
 		"exp":             token.Status.Data.Exp,
 		"nbf":             token.Status.Data.NBf,
+		"namespace":       token.Status.Data.Namespace,
 		"verbs":           token.Status.Data.Verbs,
 		"apiGroups":       token.Status.Data.APIGroups,
 		"resources":       token.Status.Data.Resources,
