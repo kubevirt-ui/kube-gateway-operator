@@ -4,5 +4,14 @@ metadata:
   name: gatetoken-sample
   namespace: oc-gate
 spec:
-  match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
-
+  verbs:
+    - "get"
+    - "watch"
+    - "list"
+  APIGroups:
+    - ""
+    - "kubevirt.io/v1alpha3"
+  resources:
+    - "pods"
+    - "virtualmachineinstances"
+  generateServiceAccount: false

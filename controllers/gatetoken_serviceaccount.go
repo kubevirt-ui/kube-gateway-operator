@@ -45,16 +45,15 @@ func (r *GateTokenReconciler) serviceaccount(s *ocgatev1beta1.GateToken) (*corev
 	return serviceaccount, nil
 }
 
-func (r *GateTokenReconciler) role(s *ocgatev1beta1.GateToken) (*rbacv1.Role, error) {
+func (r *GateTokenReconciler) clusterrole(s *ocgatev1beta1.GateToken) (*rbacv1.ClusterRole, error) {
 	labels := map[string]string{
 		"app": s.Name,
 	}
 
-	role := &rbacv1.Role{
+	role := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
-			Namespace: s.Namespace,
-			Labels:    labels,
+			Name:   s.Name,
+			Labels: labels,
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
@@ -71,26 +70,26 @@ func (r *GateTokenReconciler) role(s *ocgatev1beta1.GateToken) (*rbacv1.Role, er
 	return role, nil
 }
 
-func (r *GateTokenReconciler) rolebinding(s *ocgatev1beta1.GateToken) (*rbacv1.RoleBinding, error) {
+func (r *GateTokenReconciler) clusterrolebinding(s *ocgatev1beta1.GateToken) (*rbacv1.ClusterRoleBinding, error) {
 	labels := map[string]string{
 		"app": s.Name,
 	}
 
-	rolebinding := &rbacv1.RoleBinding{
+	rolebinding := &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
-			Namespace: s.Namespace,
-			Labels:    labels,
+			Name:   s.Name,
+			Labels: labels,
 		},
 		Subjects: []rbacv1.Subject{
 			{
-				Kind: "ServiceAccount",
-				Name: s.Name,
+				Kind:      "ServiceAccount",
+				Namespace: s.Namespace,
+				Name:      s.Name,
 			},
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
+			Kind:     "ClusterRole",
 			Name:     s.Name,
 		},
 	}

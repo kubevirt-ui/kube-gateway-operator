@@ -59,7 +59,7 @@ type GateTokenSpec struct {
 	// +kubebuilder:default:=3600
 	DurationSec int64 `json:"durationSec"`
 
-	// gnerateServiceAccount determain if the operator will create a service account and
+	// generateServiceAccount determain if the operator will create a service account and
 	// delever the actual service account token instead of a JWT access key.
 	// the service account will be generated not before the token is valid
 	// and will be deleted when the token expires.
@@ -68,7 +68,7 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=false
-	GenerateServiceAccount bool `json:"gnerateServiceAccount,omitempty"`
+	GenerateServiceAccount bool `json:"generateServiceAccount,omitempty"`
 
 	// verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule.  VerbAll represents all kinds.
 	// APIGroups is the name of the APIGroup that contains the resources.

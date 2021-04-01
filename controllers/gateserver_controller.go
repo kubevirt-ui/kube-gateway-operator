@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -120,6 +121,25 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, nil
 	}
 
+	// Check role
+	var err error
+	if len(gateserver.Spec.ServiceAccountNonResourceURLs) != 0 && len(gateserver.Spec.ServiceAccountAPIGroups) != 0 {
+		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but not both")
+	}
+	if len(gateserver.Spec.ServiceAccountNonResourceURLs) == 0 && len(gateserver.Spec.ServiceAccountAPIGroups) == 0 {
+		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but can't be empty")
+	}
+
+	if err != nil {
+		r.Log.Info("Failed to create oc gate proxy.", "err", err)
+
+		setServerCondition(gateserver, "FailedCreateServer", err)
+		if err := r.Status().Update(ctx, gateserver); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
+		return ctrl.Result{}, nil
+	}
+
 	// Create the server
 	if err := r.buildServer(ctx, gateserver); err != nil {
 		r.Log.Info("Failed to create oc gate proxy.", "err", err)
@@ -135,7 +155,8 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if !controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {
 		controllerutil.AddFinalizer(gateserver, gateserverFinalizer)
 		if err := r.Update(ctx, gateserver); err != nil {
-			return ctrl.Result{}, err
+			r.Log.Info("Failed to add finalizer", "err", err)
+			return ctrl.Result{}, nil
 		}
 	}
 
@@ -165,6 +186,7 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 
 	ctx := context.Background()
 	opts := &client.DeleteOptions{}
+	errs := []error{}
 
 	r.Log.Info("Deleting cluster role and cluster role binding...")
 
@@ -173,10 +195,9 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 			Name: s.Name,
 		},
 	}
-
 	if err := r.Delete(ctx, clusterRole, opts); err != nil {
-		r.Log.Info("Failed to finalize gateserver", "err", err)
-		return nil
+		r.Log.Info("Failed to finalize clusterRole", "err", err)
+		errs = append(errs, err)
 	}
 
 	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
@@ -185,8 +206,8 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 		},
 	}
 	if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
-		r.Log.Info("Failed to finalize gateserver", "err", err)
-		return nil
+		r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
+		errs = append(errs, err)
 	}
 
 	r.Log.Info("Deleting oauthclient...")
@@ -196,11 +217,16 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 		},
 	}
 	if err := r.Delete(ctx, oauthclient, opts); err != nil {
-		r.Log.Info("Failed to finalize gateserver", "err", err)
-		return nil
+		r.Log.Info("Failed to finalize oauthclient", "err", err)
+		errs = append(errs, err)
 	}
 
-	r.Log.Info("Successfully finalized gateserver")
+	if len(errs) != 0 {
+		r.Log.Info("Failed to finalized gateserver")
+	} else {
+		r.Log.Info("Successfully finalized gateserver")
+	}
+
 	return nil
 }
 

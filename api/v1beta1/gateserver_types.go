@@ -62,7 +62,7 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:Type="array"
 	ServiceAccountAPIGroups []string `json:"serviceAccountAPIGroups,omitempty"`
 
-	// serviceAccountResources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups.
+	// serviceAccountResources is a list of resources this rule applies to. '*' represents all resources in the specified apiGroups.
 	// '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups.
 	// APIGroups is the name of the APIGroup that contains the resources.
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
@@ -79,7 +79,7 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:Type="array"
 	ServiceAccountResourceNames []string `json:"serviceAccountResourceNames,omitempty"`
 
-	// serviceAccountNonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path
+	// serviceAccountNonResourceURLs is a set of partial urls that a user should have access to. *s are allowed, but only as the full, final step in the path
 	// If an action is not a resource API request, then the URL is split on '/' and is checked against the NonResourceURLs to look for a match.
 	// Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding.
 	// Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
@@ -119,14 +119,14 @@ type GateServerSpec struct {
 	// +kubebuilder:default:=""
 	WebAppImage string `json:"webAppImage,omitempty"`
 
-	// gnerateSecret determain if a secrete with public and private kes will be automatically
+	// generateSecret determain if a secrete with public and private kes will be automatically
 	// generated when the oc-gate server is created.
 	// Defalut value is true.
 	// +optional
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=true
-	GenerateSecret bool `json:"gnerateSecret,omitempty"`
+	GenerateSecret bool `json:"generateSecret,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer

@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -34,6 +35,8 @@ import (
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
+
+const gatetokenFinalizer = "ocgate.yaacov.com/finalizer"
 
 // GateTokenReconciler reconciles a GateToken object
 type GateTokenReconciler struct {
@@ -44,9 +47,12 @@ type GateTokenReconciler struct {
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens,verbs=get;list;watch;create;delete
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete;deletecollection
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete;deletecollection
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens,verbs=get;list;watch;create;delete
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -77,8 +83,31 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	// Check if the GateServer instance is marked to be deleted, which is
+	// indicated by the deletion timestamp being set.
+	isGateTokenMarkedToBeDeleted := token.GetDeletionTimestamp() != nil
+	if isGateTokenMarkedToBeDeleted {
+		if controllerutil.ContainsFinalizer(token, gatetokenFinalizer) {
+			// Run finalization logic for gatetokenFinalizer. If the
+			// finalization logic fails, don't remove the finalizer so
+			// that we can retry during the next reconciliation.
+			if err := r.finalizeGateToken(token); err != nil {
+				return ctrl.Result{}, err
+			}
+
+			// Remove gateserverFinalizer. Once all finalizers have been
+			// removed, the object will be deleted.
+			controllerutil.RemoveFinalizer(token, gateserverFinalizer)
+			if err := r.Update(ctx, token); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		return ctrl.Result{}, nil
+	}
+
 	// If token in pending state, check nbf
 	if token.Status.Phase == "Pending" {
+		var errs []error
 		now := int64(time.Now().Unix())
 		exp := token.Status.Data.Exp
 		nbf := token.Status.Data.NBf
@@ -100,20 +129,29 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			sa, _ := r.serviceaccount(token)
 			if err := r.Client.Create(ctx, sa); err != nil {
 				r.Log.Info("Failed to create serviceaccount", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
 			}
 
-			role, _ := r.role(token)
+			role, _ := r.clusterrole(token)
 			if err := r.Client.Create(ctx, role); err != nil {
 				r.Log.Info("Failed to create role", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
 			}
 
-			rolebinding, _ := r.rolebinding(token)
+			rolebinding, _ := r.clusterrolebinding(token)
 			if err := r.Client.Create(ctx, rolebinding); err != nil {
 				r.Log.Info("Failed to create rolebinding", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
 			}
+		}
+
+		if len(errs) != 0 {
+			setErrorCondition(token, "FailedSA", errs[0])
+			if err := r.Status().Update(ctx, token); err != nil {
+				r.Log.Info("Failed to update status", "err", err)
+			}
+
+			return ctrl.Result{}, nil
 		}
 
 		// If token is found, move to Ready
@@ -193,6 +231,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			r.Log.Info("Deleting service acount...")
 
 			opts := &client.DeleteOptions{}
+			errs := []error{}
 
 			sa := &corev1.ServiceAccount{
 				ObjectMeta: metav1.ObjectMeta{
@@ -200,33 +239,33 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 					Namespace: token.Namespace,
 				},
 			}
-
 			if err := r.Delete(ctx, sa, opts); err != nil {
 				r.Log.Info("Failed to delete service account", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
 			}
 
-			role := &rbacv1.Role{
+			role := &rbacv1.ClusterRole{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      token.Name,
-					Namespace: token.Namespace,
+					Name: token.Name,
 				},
 			}
-
 			if err := r.Delete(ctx, role, opts); err != nil {
 				r.Log.Info("Failed to delete role", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
 			}
 
-			roleBinding := &rbacv1.RoleBinding{
+			roleBinding := &rbacv1.ClusterRoleBinding{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      token.Name,
-					Namespace: token.Namespace,
+					Name: token.Name,
 				},
 			}
 			if err := r.Delete(ctx, roleBinding, opts); err != nil {
 				r.Log.Info("Failed to delete roleBinding", "err", err)
-				return ctrl.Result{}, nil
+				errs = append(errs, err)
+			}
+
+			if len(errs) != 0 {
+				r.Log.Info("Failed to delete service account")
 			}
 		}
 
@@ -244,12 +283,30 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
+	// Check role
+	var err error
+	if len(token.Spec.NonResourceURLs) != 0 && len(token.Spec.APIGroups) != 0 {
+		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but not both")
+	}
+	if len(token.Spec.NonResourceURLs) == 0 && len(token.Spec.APIGroups) == 0 {
+		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but can't be empty")
+	}
+
+	if err != nil {
+		r.Log.Info("Failed to create oc gate token.", "err", err)
+
+		setErrorCondition(token, "UserDataError", err)
+		if err := r.Status().Update(ctx, token); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
+		return ctrl.Result{}, nil
+	}
+
 	// Parse and cache user data.
 	if err := cacheData(token); err != nil {
 		r.Log.Info("Can't parse token data", "err", err)
 
 		setErrorCondition(token, "UserDataError", err)
-
 		if err := r.Status().Update(ctx, token); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
@@ -267,7 +324,6 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			if err := r.Status().Update(ctx, token); err != nil {
 				r.Log.Info("Failed to update status", "err", err)
 			}
-
 			return ctrl.Result{}, nil
 		}
 
@@ -285,12 +341,67 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}
 
+	// Add finalizer for this CR
+	if !controllerutil.ContainsFinalizer(token, gatetokenFinalizer) {
+		controllerutil.AddFinalizer(token, gatetokenFinalizer)
+		if err := r.Update(ctx, token); err != nil {
+			r.Log.Info("Failed to add finalizer", "err", err)
+			return ctrl.Result{}, nil
+		}
+	}
+
 	// Token is ready
-	setPendingCondition(token, "TokenCreated", "Token created")
+	setPendingCondition(token, "TokenPending", "Token pending")
 	if err := r.Status().Update(ctx, token); err != nil {
 		r.Log.Info("Failed to update status", "err", err)
 	}
 	return ctrl.Result{}, nil
+}
+
+func (r *GateTokenReconciler) finalizeGateToken(s *ocgatev1beta1.GateToken) error {
+	// TODO(user): Add the cleanup steps that the operator
+	// needs to do before the CR can be deleted. Examples
+	// of finalizers include performing backups and deleting
+	// resources that are not owned by this CR, like a PVC.
+
+	ctx := context.Background()
+	opts := &client.DeleteOptions{}
+	errs := []error{}
+
+	if !s.Spec.GenerateServiceAccount {
+		r.Log.Info("Successfully finalized gatetoken (no ServiceAccount)")
+		return nil
+	}
+
+	r.Log.Info("Deleting cluster role and cluster role binding...")
+
+	clusterRole := &rbacv1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+		},
+	}
+	if err := r.Delete(ctx, clusterRole, opts); err != nil {
+		r.Log.Info("Failed to finalize clusterRole", "err", err)
+		errs = append(errs, err)
+	}
+
+	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: s.Name,
+		},
+	}
+	if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
+		r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
+		errs = append(errs, err)
+	}
+
+	if len(errs) != 0 {
+		r.Log.Info("Failed to finalized gatetoken")
+	} else {
+		r.Log.Info("Successfully finalized gatetoken (ServiceAccount)")
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

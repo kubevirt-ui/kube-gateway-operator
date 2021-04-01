@@ -4,6 +4,17 @@ metadata:
   name: oc-gate-server
   namespace: oc-gate
 spec:
-  image: quay.io/yaacov/oc-gate:latest
-  web-app-image: quay.io/yaacov/oc-gate-web-app-novnc:latest
-  route: test-proxy.apps.ostest.test.metalkube.org
+  apiURL: "https://kubernetes.default.svc"
+  route: oc-gate-proxy.apps-crc.testing
+  serviceAccountVerbs:
+    - "get"
+    - "watch"
+    - "list"
+  serviceAccountAPIGroups:
+    - "*"
+  serviceAccountResources:
+    - "*"
+  gnerateSecret: true
+  passThrough: false
+  image: "quay.io/yaacov/oc-gate:latest"
+  webAppImage: "quay.io/yaacov/oc-gate-web-app-novnc:latest"

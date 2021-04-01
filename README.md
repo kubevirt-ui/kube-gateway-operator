@@ -68,7 +68,10 @@ metadata:
   name: gatetoken-sample
   namespace: oc-gate
 spec:
-  match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
+  verbs:
+    - "get"
+  nonResourceURLs:
+    - "/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc"
 ```
 
 ## Example GateServer CR
@@ -83,8 +86,21 @@ metadata:
   name: gateserver-sample
   namespace: oc-gate
 spec:
-  # use the web-app-image to customize the static files of your web app.
-  web-app-image: quay.io/yaacov/oc-gate-web-app-novnc:latest
-  image: quay.io/yaacov/oc-gate:latest
-  route: test-proxy.apps.ostest.test.metalkube.org
+  apiURL: 'https://kubernetes.default.svc'
+  route: oc-gate-proxy.apps-crc.testing
+  # use serviceAccount to create allow the proxy to access k8s resources
+  # and proxy them the to users authenticating using JWT tokens.
+  serviceAccountVerbs:
+    - "get"
+    - "watch"
+    - "list"
+  serviceAccountAPIGroups:
+    - '*'
+  serviceAccountResources:
+    - '*'
+  gnerateSecret: true
+  passThrough: false
+  image: 'quay.io/yaacov/oc-gate:latest'
+  # use the webAppImage to customize the static files of your web app.
+  webAppImage: 'quay.io/yaacov/oc-gate-web-app-novnc:latest'
 ```

@@ -57,9 +57,9 @@ spec:
                   time. Defalut to token object creation time.
                 format: date-time
                 type: string
-              gnerateServiceAccount:
+              generateServiceAccount:
                 default: false
-                description: gnerateServiceAccount determain if the operator will
+                description: generateServiceAccount determain if the operator will
                   create a service account and delever the actual service account
                   token instead of a JWT access key. the service account will be generated
                   not before the token is valid and will be deleted when the token
