@@ -88,8 +88,10 @@ metadata:
 spec:
   apiURL: 'https://kubernetes.default.svc'
   route: oc-gate-proxy.apps-crc.testing
-  # use serviceAccount to create allow the proxy to access k8s resources
-  # and proxy them the to users authenticating using JWT tokens.
+  # serviceAccount fields are used to create a service account for the oc gate proxy.
+  # The proxy will run using this service account, it will be abale to
+  # proxy only requests available to this service account. Make sure to allow the 
+  # proxy to access all k8s resources that the web application will consume.
   serviceAccountVerbs:
     - "get"
     - "watch"
@@ -98,9 +100,15 @@ spec:
     - '*'
   serviceAccountResources:
     - '*'
+  # gnerateSecret is used to automatically create a secret holding the asymetrical
+  # keys needed to sign and authenticate the JWT tokens.
   gnerateSecret: true
+  # use 
   passThrough: false
+  # the proxy server container image
   image: 'quay.io/yaacov/oc-gate:latest'
-  # use the webAppImage to customize the static files of your web app.
+  # webAppImage is used to customize the static files of your web app.
+  # this example will install the noVNC web application that consume
+  # websockets streaming VNC data.
   webAppImage: 'quay.io/yaacov/oc-gate-web-app-novnc:latest'
 ```
