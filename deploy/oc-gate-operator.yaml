@@ -492,6 +492,8 @@ rules:
   - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - ocgate.yaacov.com
@@ -721,7 +723,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/oc-gate-operator@sha256:d1ca8ebe9f57ebe4af9a679e7ec13c363282125d668f05efd35e8aa0a55c5ea7
+        image: quay.io/yaacov/oc-gate-operator@sha256:e8602a79830d1d97d2e2e1b51e3d0ef14a58a621f051c6fed223b27c01cc8304
         livenessProbe:
           httpGet:
             path: /healthz

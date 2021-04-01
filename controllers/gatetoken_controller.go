@@ -50,7 +50,7 @@ type GateTokenReconciler struct {
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete;deletecollection
-// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens,verbs=get;list;watch;create;delete
+// +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="ocgate.yaacov.com",resources=gatetokens/finalizers,verbs=update
 

@@ -37,6 +37,7 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 
 	if token.Spec.From == "" {
 		nbf = int64(time.Now().Unix())
+		token.Spec.From = time.Unix(nbf, 0).UTC().Format(time.RFC3339)
 	} else {
 		t, err := time.Parse(time.RFC3339, token.Spec.From)
 		if err != nil {
