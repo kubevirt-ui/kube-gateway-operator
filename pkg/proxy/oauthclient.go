@@ -25,7 +25,7 @@ import (
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
 
-// OauthClient is a
+// OAuthClient is a
 func OAuthClient(s *ocgatev1beta1.GateServer) (*oauthv1.OAuthClient, error) {
 	labels := map[string]string{
 		"app": s.Name,
