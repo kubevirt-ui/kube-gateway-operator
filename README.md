@@ -103,7 +103,8 @@ spec:
   # gnerateSecret is used to automatically create a secret holding the asymetrical
   # keys needed to sign and authenticate the JWT tokens.
   gnerateSecret: true
-  # use 
+  # passThrough is used to pass the request token directoy to k8s API server
+  # without authenticating and replacing with the service account access token of the proxy.
   passThrough: false
   # the proxy server container image
   image: 'quay.io/yaacov/oc-gate:latest'
