@@ -14,12 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package proxy
 
 import (
 	"fmt"
-
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +25,71 @@ import (
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
+
+// Deployment is a
+func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
+	replicas := int32(1)
+	labels := map[string]string{
+		"app": s.Name,
+	}
+	matchlabels := map[string]string{
+		"app": s.Name,
+	}
+
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      s.Name,
+			Namespace: s.Namespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: matchlabels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: matchlabels,
+				},
+				Spec: corev1.PodSpec{
+					InitContainers: initContainers(s),
+					Containers:     containers(s),
+
+					Volumes: []corev1.Volume{
+						{
+							Name: "oc-gate-secret",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: fmt.Sprintf("%s-secret", s.Name),
+								},
+							},
+						},
+						{
+							Name: "oc-gate-jwt-secret",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: "oc-gate-jwt-secret",
+								},
+							},
+						},
+						{
+							Name: "web-application",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
+					},
+
+					ServiceAccountName: s.Name,
+				},
+			},
+		},
+	}
+
+	//controllerutil.SetControllerReference(s, deployment, r.Scheme)
+
+	return deployment, nil
+}
 
 func initContainers(s *ocgatev1beta1.GateServer) []corev1.Container {
 	// Return nil if no web app available
@@ -100,68 +163,4 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 	}}
 
 	return containers
-}
-
-func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
-	replicas := int32(1)
-	labels := map[string]string{
-		"app": s.Name,
-	}
-	matchlabels := map[string]string{
-		"app": s.Name,
-	}
-
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      s.Name,
-			Namespace: s.Namespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: matchlabels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: matchlabels,
-				},
-				Spec: corev1.PodSpec{
-					InitContainers: initContainers(s),
-					Containers:     containers(s),
-
-					Volumes: []corev1.Volume{
-						{
-							Name: "oc-gate-secret",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: fmt.Sprintf("%s-secret", s.Name),
-								},
-							},
-						},
-						{
-							Name: "oc-gate-jwt-secret",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: "oc-gate-jwt-secret",
-								},
-							},
-						},
-						{
-							Name: "web-application",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
-						},
-					},
-
-					ServiceAccountName: s.Name,
-				},
-			},
-		},
-	}
-
-	controllerutil.SetControllerReference(s, deployment, r.Scheme)
-
-	return deployment, nil
 }

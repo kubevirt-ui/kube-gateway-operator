@@ -121,6 +121,11 @@ spec:
                 items:
                   type: string
                 type: array
+              serviceAccountnamespace:
+                default: '*'
+                description: serviceAccountnamespace of the rule. "*" represents all
+                  namespaces. Defalut value is "*".
+                type: string
               webAppImage:
                 default: ""
                 description: webAppImage is the oc gate proxy web application image

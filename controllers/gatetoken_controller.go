@@ -34,6 +34,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	"github.com/yaacov/oc-gate-operator/pkg/token"
 )
 
 const gatetokenFinalizer = "ocgate.yaacov.com/finalizer"
@@ -69,8 +70,8 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// your logic here
 
 	// Lookup the GateToken instance for this reconcile request
-	token := &ocgatev1beta1.GateToken{}
-	if err := r.Get(ctx, req.NamespacedName, token); err != nil {
+	t := &ocgatev1beta1.GateToken{}
+	if err := r.Get(ctx, req.NamespacedName, t); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -85,20 +86,20 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Check if the GateServer instance is marked to be deleted, which is
 	// indicated by the deletion timestamp being set.
-	isGateTokenMarkedToBeDeleted := token.GetDeletionTimestamp() != nil
+	isGateTokenMarkedToBeDeleted := t.GetDeletionTimestamp() != nil
 	if isGateTokenMarkedToBeDeleted {
-		if controllerutil.ContainsFinalizer(token, gatetokenFinalizer) {
+		if controllerutil.ContainsFinalizer(t, gatetokenFinalizer) {
 			// Run finalization logic for gatetokenFinalizer. If the
 			// finalization logic fails, don't remove the finalizer so
 			// that we can retry during the next reconciliation.
-			if err := r.finalizeGateToken(token); err != nil {
+			if err := r.finalizeGateToken(t); err != nil {
 				return ctrl.Result{}, err
 			}
 
 			// Remove gateserverFinalizer. Once all finalizers have been
 			// removed, the object will be deleted.
-			controllerutil.RemoveFinalizer(token, gateserverFinalizer)
-			if err := r.Update(ctx, token); err != nil {
+			controllerutil.RemoveFinalizer(t, gateserverFinalizer)
+			if err := r.Update(ctx, t); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
@@ -106,13 +107,13 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// If token in pending state, check nbf
-	if token.Status.Phase == "Pending" {
+	if t.Status.Phase == "Pending" {
 		var errs []error
 		now := int64(time.Now().Unix())
-		exp := token.Status.Data.Exp
-		nbf := token.Status.Data.NBf
+		exp := t.Status.Data.Exp
+		nbf := t.Status.Data.NBf
 
-		r.Log.Info("Pending phase token", "id", token.Name, "now", now, "nbf", nbf, "exp", exp)
+		r.Log.Info("Pending phase token", "id", t.Name, "now", now, "nbf", nbf, "exp", exp)
 
 		if (nbf - now) > 0 {
 			r.Log.Info("Pending RequeueAfter", "sec", (nbf - now))
@@ -124,28 +125,32 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// If token is ready, create sideeffects
 		// and set phase to ready
 
-		if token.Spec.GenerateServiceAccount {
+		if t.Spec.GenerateServiceAccount {
 			r.Log.Info("Create namespaced service account.")
-			sa, _ := r.serviceaccount(token)
-			if err := r.Client.Create(ctx, sa); err != nil {
+			serviceaccount, _ := token.ServiceAccount(t)
+			controllerutil.SetControllerReference(t, serviceaccount, r.Scheme)
+			if err := r.Client.Create(ctx, serviceaccount); err != nil {
 				r.Log.Info("Failed to create serviceaccount", "err", err)
 				errs = append(errs, err)
 			}
 
-			role, _ := r.clusterrole(token)
-			if err := r.Client.Create(ctx, role); err != nil {
+			clusterrole, _ := token.ClusterRole(t)
+			controllerutil.SetControllerReference(t, clusterrole, r.Scheme)
+			if err := r.Client.Create(ctx, clusterrole); err != nil {
 				r.Log.Info("Failed to create role", "err", err)
 				errs = append(errs, err)
 			}
 
-			if token.Spec.Namespace == "*" {
-				rolebinding, _ := r.clusterrolebinding(token)
-				if err := r.Client.Create(ctx, rolebinding); err != nil {
+			if t.Spec.Namespace == "*" {
+				clusterrolebinding, _ := token.ClusterRoleBinding(t)
+				controllerutil.SetControllerReference(t, clusterrolebinding, r.Scheme)
+				if err := r.Client.Create(ctx, clusterrolebinding); err != nil {
 					r.Log.Info("Failed to create clusterrolebinding", "err", err)
 					errs = append(errs, err)
 				}
 			} else {
-				rolebinding, _ := r.rolebinding(token)
+				rolebinding, _ := token.RoleBinding(t)
+				controllerutil.SetControllerReference(t, rolebinding, r.Scheme)
 				if err := r.Client.Create(ctx, rolebinding); err != nil {
 					r.Log.Info("Failed to create rolebinding", "err", err)
 					errs = append(errs, err)
@@ -154,8 +159,8 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 
 		if len(errs) != 0 {
-			setErrorCondition(token, "FailedSA", errs[0])
-			if err := r.Status().Update(ctx, token); err != nil {
+			setErrorCondition(t, "FailedSA", errs[0])
+			if err := r.Status().Update(ctx, t); err != nil {
 				r.Log.Info("Failed to update status", "err", err)
 			}
 
@@ -163,21 +168,21 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 
 		// If token is found, move to Ready
-		setReadyCondition(token, "Ready", "Token is ready")
-		if err := r.Status().Update(ctx, token); err != nil {
+		setReadyCondition(t, "Ready", "Token is ready")
+		if err := r.Status().Update(ctx, t); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 
 		// If using k8s to generate the token, reques and wait for token.
-		if token.Spec.GenerateServiceAccount {
+		if t.Spec.GenerateServiceAccount {
 			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 	}
 
 	// If token in ready state and missing token, reque
-	if token.Status.Phase == "Ready" && token.Status.Token == "" && token.Spec.GenerateServiceAccount {
-		sa := &corev1.ServiceAccount{}
-		if err := r.Get(ctx, req.NamespacedName, sa); err != nil {
+	if t.Status.Phase == "Ready" && t.Status.Token == "" && t.Spec.GenerateServiceAccount {
+		serviceaccount := &corev1.ServiceAccount{}
+		if err := r.Get(ctx, req.NamespacedName, serviceaccount); err != nil {
 			if errors.IsNotFound(err) {
 				// Request object not found, could have been deleted after reconcile request.
 				// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -190,9 +195,9 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{}, err
 		}
 
-		secretPrefix := fmt.Sprintf("%s-token-", token.Name)
+		secretPrefix := fmt.Sprintf("%s-token-", t.Name)
 		secretName := ""
-		for _, s := range sa.Secrets {
+		for _, s := range serviceaccount.Secrets {
 			if strings.HasPrefix(s.Name, secretPrefix) {
 				secretName = s.Name
 			}
@@ -200,30 +205,30 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 		// Reque until token secret is available
 		r.Log.Info("Reading token", "secretName", secretName)
-		key, err := getSecret(ctx, r.Client, secretName, token.Namespace, "token")
+		key, err := getSecret(ctx, r.Client, secretName, t.Namespace, "token")
 		if err != nil {
 			r.Log.Info("Can't read service account token", "err", err)
 
-			setErrorCondition(token, "TokenGetterError", err)
-			if err := r.Status().Update(ctx, token); err != nil {
+			setErrorCondition(t, "TokenGetterError", err)
+			if err := r.Status().Update(ctx, t); err != nil {
 				r.Log.Info("Failed to update status", "err", err)
 			}
 
 			return ctrl.Result{}, nil
 		}
 
-		token.Status.Token = string(key)
-		if err := r.Status().Update(ctx, token); err != nil {
+		t.Status.Token = string(key)
+		if err := r.Status().Update(ctx, t); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 	}
 
 	// If token in ready state, check expiration
-	if token.Status.Phase == "Ready" {
+	if t.Status.Phase == "Ready" {
 		now := int64(time.Now().Unix())
-		exp := token.Status.Data.Exp
+		exp := t.Status.Data.Exp
 
-		r.Log.Info("Ready phase token", "id", token.Name, "now", now, "exp", exp)
+		r.Log.Info("Ready phase token", "id", t.Name, "now", now, "exp", exp)
 
 		if (exp - now) > 0 {
 			r.Log.Info("Ready RequeueAfter", "sec", (exp - now))
@@ -235,51 +240,51 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// If token expired, delete sideeffects
 		// and set phase to completed
 
-		if token.Spec.GenerateServiceAccount {
+		if t.Spec.GenerateServiceAccount {
 			r.Log.Info("Deleting service acount...")
 
 			opts := &client.DeleteOptions{}
 			errs := []error{}
 
-			sa := &corev1.ServiceAccount{
+			serviceaccount := &corev1.ServiceAccount{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      token.Name,
-					Namespace: token.Namespace,
+					Name:      t.Name,
+					Namespace: t.Namespace,
 				},
 			}
-			if err := r.Delete(ctx, sa, opts); err != nil {
+			if err := r.Delete(ctx, serviceaccount, opts); err != nil {
 				r.Log.Info("Failed to delete service account", "err", err)
 				errs = append(errs, err)
 			}
 
-			role := &rbacv1.ClusterRole{
+			clusterrole := &rbacv1.ClusterRole{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: token.Name,
+					Name: t.Name,
 				},
 			}
-			if err := r.Delete(ctx, role, opts); err != nil {
+			if err := r.Delete(ctx, clusterrole, opts); err != nil {
 				r.Log.Info("Failed to delete role", "err", err)
 				errs = append(errs, err)
 			}
 
-			if token.Spec.Namespace == "*" {
-				roleBinding := &rbacv1.ClusterRoleBinding{
+			if t.Spec.Namespace == "*" {
+				clusterrolebinding := &rbacv1.ClusterRoleBinding{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: token.Name,
+						Name: t.Name,
 					},
 				}
-				if err := r.Delete(ctx, roleBinding, opts); err != nil {
+				if err := r.Delete(ctx, clusterrolebinding, opts); err != nil {
 					r.Log.Info("Failed to delete clusterRoleBinding", "err", err)
 					errs = append(errs, err)
 				}
 			} else {
-				roleBinding := &rbacv1.RoleBinding{
+				rolebinding := &rbacv1.RoleBinding{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      token.Name,
-						Namespace: token.Spec.Namespace,
+						Name:      t.Name,
+						Namespace: t.Spec.Namespace,
 					},
 				}
-				if err := r.Delete(ctx, roleBinding, opts); err != nil {
+				if err := r.Delete(ctx, rolebinding, opts); err != nil {
 					r.Log.Info("Failed to delete roleBinding", "err", err)
 					errs = append(errs, err)
 				}
@@ -290,45 +295,45 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			}
 		}
 
-		setCompletedCondition(token, "Expired", "Token expired")
+		setCompletedCondition(t, "Expired", "Token expired")
 
-		if err := r.Status().Update(ctx, token); err != nil {
+		if err := r.Status().Update(ctx, t); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
 	}
 
 	// If token was created, exit.
-	if token.Status.Phase != "" {
-		r.Log.Info("Old token", "id", token.Name)
+	if t.Status.Phase != "" {
+		r.Log.Info("Old token", "id", t.Name)
 		return ctrl.Result{}, nil
 	}
 
 	// Check role
 	var err error
-	if len(token.Spec.NonResourceURLs) != 0 && len(token.Spec.APIGroups) != 0 {
+	if len(t.Spec.NonResourceURLs) != 0 && len(t.Spec.APIGroups) != 0 {
 		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but not both")
 	}
-	if len(token.Spec.NonResourceURLs) == 0 && len(token.Spec.APIGroups) == 0 {
+	if len(t.Spec.NonResourceURLs) == 0 && len(t.Spec.APIGroups) == 0 {
 		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but can't be empty")
 	}
 
 	if err != nil {
 		r.Log.Info("Failed to create oc gate token.", "err", err)
 
-		setErrorCondition(token, "UserDataError", err)
-		if err := r.Status().Update(ctx, token); err != nil {
+		setErrorCondition(t, "UserDataError", err)
+		if err := r.Status().Update(ctx, t); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
 	}
 
 	// Parse and cache user data.
-	if err := cacheData(token); err != nil {
+	if err := cacheData(t); err != nil {
 		r.Log.Info("Can't parse token data", "err", err)
 
-		setErrorCondition(token, "UserDataError", err)
-		if err := r.Status().Update(ctx, token); err != nil {
+		setErrorCondition(t, "UserDataError", err)
+		if err := r.Status().Update(ctx, t); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
@@ -336,25 +341,25 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Set gate-token access code
 	// Get private key secret
-	if !token.Spec.GenerateServiceAccount {
-		key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", token.Namespace, "key.pem")
+	if !t.Spec.GenerateServiceAccount {
+		key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", t.Namespace, "key.pem")
 		if err != nil {
 			r.Log.Info("Can't read private key secret", "err", err)
 
-			setErrorCondition(token, "PrivateKeyError", err)
-			if err := r.Status().Update(ctx, token); err != nil {
+			setErrorCondition(t, "PrivateKeyError", err)
+			if err := r.Status().Update(ctx, t); err != nil {
 				r.Log.Info("Failed to update status", "err", err)
 			}
 			return ctrl.Result{}, nil
 		}
 
 		// Create token
-		err = singToken(token, key)
+		err = singToken(t, key)
 		if err != nil {
 			r.Log.Info("Can't read private key secret", "err", err)
 
-			setErrorCondition(token, "PrivateKeyError", err)
-			if err := r.Status().Update(ctx, token); err != nil {
+			setErrorCondition(t, "PrivateKeyError", err)
+			if err := r.Status().Update(ctx, t); err != nil {
 				r.Log.Info("Failed to update status", "err", err)
 			}
 
@@ -363,23 +368,23 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Add finalizer for this CR
-	if !controllerutil.ContainsFinalizer(token, gatetokenFinalizer) {
-		controllerutil.AddFinalizer(token, gatetokenFinalizer)
-		if err := r.Update(ctx, token); err != nil {
+	if !controllerutil.ContainsFinalizer(t, gatetokenFinalizer) {
+		controllerutil.AddFinalizer(t, gatetokenFinalizer)
+		if err := r.Update(ctx, t); err != nil {
 			r.Log.Info("Failed to add finalizer", "err", err)
 			return ctrl.Result{}, nil
 		}
 	}
 
 	// Token is ready
-	setPendingCondition(token, "TokenPending", "Token pending")
-	if err := r.Status().Update(ctx, token); err != nil {
+	setPendingCondition(t, "TokenPending", "Token pending")
+	if err := r.Status().Update(ctx, t); err != nil {
 		r.Log.Info("Failed to update status", "err", err)
 	}
 	return ctrl.Result{}, nil
 }
 
-func (r *GateTokenReconciler) finalizeGateToken(s *ocgatev1beta1.GateToken) error {
+func (r *GateTokenReconciler) finalizeGateToken(t *ocgatev1beta1.GateToken) error {
 	// TODO(user): Add the cleanup steps that the operator
 	// needs to do before the CR can be deleted. Examples
 	// of finalizers include performing backups and deleting
@@ -389,30 +394,30 @@ func (r *GateTokenReconciler) finalizeGateToken(s *ocgatev1beta1.GateToken) erro
 	opts := &client.DeleteOptions{}
 	errs := []error{}
 
-	if !s.Spec.GenerateServiceAccount {
+	if !t.Spec.GenerateServiceAccount {
 		r.Log.Info("Successfully finalized gatetoken (no ServiceAccount)")
 		return nil
 	}
 
 	r.Log.Info("Deleting cluster role and cluster role binding...")
 
-	clusterRole := &rbacv1.ClusterRole{
+	clusterrole := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: s.Name,
+			Name: t.Name,
 		},
 	}
-	if err := r.Delete(ctx, clusterRole, opts); err != nil {
+	if err := r.Delete(ctx, clusterrole, opts); err != nil {
 		r.Log.Info("Failed to finalize clusterRole", "err", err)
 		errs = append(errs, err)
 	}
 
-	if s.Spec.Namespace == "*" {
-		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+	if t.Spec.Namespace == "*" {
+		clusterrolebinding := &rbacv1.ClusterRoleBinding{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: s.Name,
+				Name: t.Name,
 			},
 		}
-		if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
+		if err := r.Delete(ctx, clusterrolebinding, opts); err != nil {
 			r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
 			errs = append(errs, err)
 		}

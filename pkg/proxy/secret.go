@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package proxy
 
 import (
 	"crypto/rand"
@@ -24,13 +24,47 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
+
+// Secret is a
+func Secret(s *ocgatev1beta1.GateServer) (*corev1.Secret, error) {
+	labels := map[string]string{
+		"app": s.Name,
+	}
+
+	bitSize := 4096
+
+	privateKey, err := generatePrivateKey(bitSize)
+	if err != nil {
+		return nil, err
+	}
+
+	publicKeyBytes, err := encodePublicKeyToPEM(&privateKey.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	privateKeyBytes := encodePrivateKeyToPEM(privateKey)
+
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      JWTSecretName,
+			Namespace: s.Namespace,
+			Labels:    labels,
+		},
+		Data: map[string][]byte{
+			"cert.pem": publicKeyBytes,
+			"key.pem":  privateKeyBytes,
+		},
+	}
+	//controllerutil.SetControllerReference(s, secret, r.Scheme)
+
+	return secret, nil
+}
 
 // JWTSecretName is the name of the secret holding the private and public SSH keys
 // for authenticating the JWT access codes.
@@ -101,39 +135,4 @@ func generatePublicKey(privatekey *rsa.PublicKey) ([]byte, error) {
 	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
 
 	return pubKeyBytes, nil
-}
-
-func (r *GateServerReconciler) secret(s *ocgatev1beta1.GateServer) (*corev1.Secret, error) {
-	labels := map[string]string{
-		"app": s.Name,
-	}
-
-	bitSize := 4096
-
-	privateKey, err := generatePrivateKey(bitSize)
-	if err != nil {
-		return nil, err
-	}
-
-	publicKeyBytes, err := encodePublicKeyToPEM(&privateKey.PublicKey)
-	if err != nil {
-		return nil, err
-	}
-
-	privateKeyBytes := encodePrivateKeyToPEM(privateKey)
-
-	secret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      JWTSecretName,
-			Namespace: s.Namespace,
-			Labels:    labels,
-		},
-		Data: map[string][]byte{
-			"cert.pem": publicKeyBytes,
-			"key.pem":  privateKeyBytes,
-		},
-	}
-	controllerutil.SetControllerReference(s, secret, r.Scheme)
-
-	return secret, nil
 }

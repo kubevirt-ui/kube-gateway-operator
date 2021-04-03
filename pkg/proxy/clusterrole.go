@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package proxy
 
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
 )
 
-func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRole, error) {
+// ClusterRole is a
+func ClusterRole(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRole, error) {
 	labels := map[string]string{
 		"app": s.Name,
 	}
@@ -44,35 +44,7 @@ func (r *GateServerReconciler) clusterrole(s *ocgatev1beta1.GateServer) (*rbacv1
 			},
 		},
 	}
-	controllerutil.SetControllerReference(s, role, r.Scheme)
+	//controllerutil.SetControllerReference(s, role, r.Scheme)
 
 	return role, nil
-}
-
-func (r *GateServerReconciler) clusterrolebinding(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRoleBinding, error) {
-	labels := map[string]string{
-		"app": s.Name,
-	}
-
-	rolebinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   s.Name,
-			Labels: labels,
-		},
-		Subjects: []rbacv1.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Namespace: s.Namespace,
-				Name:      s.Name,
-			},
-		},
-		RoleRef: rbacv1.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "ClusterRole",
-			Name:     s.Name,
-		},
-	}
-	controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
-
-	return rolebinding, nil
 }

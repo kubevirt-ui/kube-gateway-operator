@@ -32,33 +32,33 @@ import (
 )
 
 // Cache user data
-func cacheData(token *ocgatev1beta1.GateToken) error {
-	var nbf int64
+func cacheData(t *ocgatev1beta1.GateToken) error {
+	var notBeforeTime int64
 
-	if token.Spec.From == "" {
-		nbf = int64(time.Now().Unix())
-		token.Spec.From = time.Unix(nbf, 0).UTC().Format(time.RFC3339)
+	if t.Spec.From == "" {
+		notBeforeTime = int64(time.Now().Unix())
+		t.Spec.From = time.Unix(notBeforeTime, 0).UTC().Format(time.RFC3339)
 	} else {
-		t, err := time.Parse(time.RFC3339, token.Spec.From)
+		fromTime, err := time.Parse(time.RFC3339, t.Spec.From)
 		if err != nil {
 			return err
 		}
-		nbf = int64(t.Unix())
+		notBeforeTime = int64(fromTime.Unix())
 	}
 
-	token.Status.Data = ocgatev1beta1.GateTokenCache{
-		From:            token.Spec.From,
-		Until:           time.Unix(nbf+int64(token.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
-		DurationSec:     token.Spec.DurationSec,
-		NBf:             nbf,
-		Exp:             nbf + int64(token.Spec.DurationSec),
+	t.Status.Data = ocgatev1beta1.GateTokenCache{
+		From:            t.Spec.From,
+		Until:           time.Unix(notBeforeTime+int64(t.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
+		DurationSec:     t.Spec.DurationSec,
+		NBf:             notBeforeTime,
+		Exp:             notBeforeTime + int64(t.Spec.DurationSec),
 		Alg:             jwt.SigningMethodRS256.Name,
-		Namespace:       token.Spec.Namespace,
-		Verbs:           token.Spec.Verbs,
-		APIGroups:       token.Spec.APIGroups,
-		Resources:       token.Spec.Resources,
-		ResourceNames:   token.Spec.ResourceNames,
-		NonResourceURLs: token.Spec.NonResourceURLs,
+		Namespace:       t.Spec.Namespace,
+		Verbs:           t.Spec.Verbs,
+		APIGroups:       t.Spec.APIGroups,
+		Resources:       t.Spec.Resources,
+		ResourceNames:   t.Spec.ResourceNames,
+		NonResourceURLs: t.Spec.NonResourceURLs,
 	}
 
 	return nil
@@ -80,69 +80,69 @@ func getSecret(ctx context.Context, client client.Client, name string, namespace
 	return key, nil
 }
 
-func setErrorCondition(token *ocgatev1beta1.GateToken, reason string, err error) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Error"
+func setErrorCondition(t *ocgatev1beta1.GateToken, reason string, err error) {
+	now := metav1.Time{Time: time.Now()}
+	t.Status.Phase = "Error"
 	condition := metav1.Condition{
 		Type:               "Error",
 		Status:             "True",
 		Reason:             reason,
 		Message:            fmt.Sprintf("%s", err),
-		LastTransitionTime: t,
+		LastTransitionTime: now,
 	}
-	token.Status.Conditions = append(token.Status.Conditions, condition)
+	t.Status.Conditions = append(t.Status.Conditions, condition)
 }
 
-func setReadyCondition(token *ocgatev1beta1.GateToken, reason string, message string) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Ready"
+func setReadyCondition(t *ocgatev1beta1.GateToken, reason string, message string) {
+	now := metav1.Time{Time: time.Now()}
+	t.Status.Phase = "Ready"
 	condition := metav1.Condition{
 		Type:               "Ready",
 		Status:             "True",
 		Reason:             reason,
 		Message:            message,
-		LastTransitionTime: t,
+		LastTransitionTime: now,
 	}
-	token.Status.Conditions = append(token.Status.Conditions, condition)
+	t.Status.Conditions = append(t.Status.Conditions, condition)
 }
 
-func setPendingCondition(token *ocgatev1beta1.GateToken, reason string, message string) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Pending"
+func setPendingCondition(t *ocgatev1beta1.GateToken, reason string, message string) {
+	now := metav1.Time{Time: time.Now()}
+	t.Status.Phase = "Pending"
 	condition := metav1.Condition{
 		Type:               "Pending",
 		Status:             "True",
 		Reason:             reason,
 		Message:            message,
-		LastTransitionTime: t,
+		LastTransitionTime: now,
 	}
-	token.Status.Conditions = append(token.Status.Conditions, condition)
+	t.Status.Conditions = append(t.Status.Conditions, condition)
 }
 
-func setCompletedCondition(token *ocgatev1beta1.GateToken, reason string, message string) {
-	t := metav1.Time{Time: time.Now()}
-	token.Status.Phase = "Completed"
+func setCompletedCondition(t *ocgatev1beta1.GateToken, reason string, message string) {
+	now := metav1.Time{Time: time.Now()}
+	t.Status.Phase = "Completed"
 	condition := metav1.Condition{
 		Type:               "Completed",
 		Status:             "True",
 		Reason:             reason,
 		Message:            message,
-		LastTransitionTime: t,
+		LastTransitionTime: now,
 	}
-	token.Status.Conditions = append(token.Status.Conditions, condition)
+	t.Status.Conditions = append(t.Status.Conditions, condition)
 }
 
-func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
+func singToken(t *ocgatev1beta1.GateToken, key []byte) error {
 	// Create token
 	claims := &jwt.MapClaims{
-		"exp":             token.Status.Data.Exp,
-		"nbf":             token.Status.Data.NBf,
-		"namespace":       token.Status.Data.Namespace,
-		"verbs":           token.Status.Data.Verbs,
-		"apiGroups":       token.Status.Data.APIGroups,
-		"resources":       token.Status.Data.Resources,
-		"resourceNames":   token.Status.Data.ResourceNames,
-		"nonResourceURLs": token.Status.Data.NonResourceURLs,
+		"exp":             t.Status.Data.Exp,
+		"nbf":             t.Status.Data.NBf,
+		"namespace":       t.Status.Data.Namespace,
+		"verbs":           t.Status.Data.Verbs,
+		"apiGroups":       t.Status.Data.APIGroups,
+		"resources":       t.Status.Data.Resources,
+		"resourceNames":   t.Status.Data.ResourceNames,
+		"nonResourceURLs": t.Status.Data.NonResourceURLs,
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwtKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
@@ -154,6 +154,6 @@ func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
 		return err
 	}
 
-	token.Status.Token = out
+	t.Status.Token = out
 	return nil
 }

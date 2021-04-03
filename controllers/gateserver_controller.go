@@ -79,8 +79,8 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// your logic here
 
 	// Lookup the GateToken instance for this reconcile request
-	gateserver := &ocgatev1beta1.GateServer{}
-	if err := r.Get(ctx, req.NamespacedName, gateserver); err != nil {
+	s := &ocgatev1beta1.GateServer{}
+	if err := r.Get(ctx, req.NamespacedName, s); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
@@ -95,20 +95,20 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	// Check if the GateServer instance is marked to be deleted, which is
 	// indicated by the deletion timestamp being set.
-	isGateServerMarkedToBeDeleted := gateserver.GetDeletionTimestamp() != nil
+	isGateServerMarkedToBeDeleted := s.GetDeletionTimestamp() != nil
 	if isGateServerMarkedToBeDeleted {
-		if controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {
+		if controllerutil.ContainsFinalizer(s, gateserverFinalizer) {
 			// Run finalization logic for gateserverFinalizer. If the
 			// finalization logic fails, don't remove the finalizer so
 			// that we can retry during the next reconciliation.
-			if err := r.finalizeGateServer(gateserver); err != nil {
+			if err := r.finalizeGateServer(s); err != nil {
 				return ctrl.Result{}, err
 			}
 
 			// Remove gateserverFinalizer. Once all finalizers have been
 			// removed, the object will be deleted.
-			controllerutil.RemoveFinalizer(gateserver, gateserverFinalizer)
-			if err := r.Update(ctx, gateserver); err != nil {
+			controllerutil.RemoveFinalizer(s, gateserverFinalizer)
+			if err := r.Update(ctx, s); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
@@ -116,62 +116,62 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// If token was created, exit.
-	if gateserver.Status.Phase != "" {
-		r.Log.Info("Old server", "id", gateserver.Name)
+	if s.Status.Phase != "" {
+		r.Log.Info("Old server", "id", s.Name)
 		return ctrl.Result{}, nil
 	}
 
 	// Check role
 	var err error
-	if len(gateserver.Spec.ServiceAccountNonResourceURLs) != 0 && len(gateserver.Spec.ServiceAccountAPIGroups) != 0 {
+	if len(s.Spec.ServiceAccountNonResourceURLs) != 0 && len(s.Spec.ServiceAccountAPIGroups) != 0 {
 		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but not both")
 	}
-	if len(gateserver.Spec.ServiceAccountNonResourceURLs) == 0 && len(gateserver.Spec.ServiceAccountAPIGroups) == 0 {
+	if len(s.Spec.ServiceAccountNonResourceURLs) == 0 && len(s.Spec.ServiceAccountAPIGroups) == 0 {
 		err = fmt.Errorf("auth roles can either apply to API resources or non-resource URL paths, but can't be empty")
 	}
 
 	if err != nil {
 		r.Log.Info("Failed to create oc gate proxy.", "err", err)
 
-		setServerCondition(gateserver, "FailedCreateServer", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
+		setServerCondition(s, "FailedCreateServer", err)
+		if err := r.Status().Update(ctx, s); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
 	}
 
 	// Create the server
-	if err := r.buildServer(ctx, gateserver); err != nil {
+	if err := r.buildServer(ctx, s); err != nil {
 		r.Log.Info("Failed to create oc gate proxy.", "err", err)
 
-		setServerCondition(gateserver, "FailedCreateServer", err)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
+		setServerCondition(s, "FailedCreateServer", err)
+		if err := r.Status().Update(ctx, s); err != nil {
 			r.Log.Info("Failed to update status", "err", err)
 		}
 		return ctrl.Result{}, nil
 	}
 
 	// Add finalizer for this CR
-	if !controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {
-		controllerutil.AddFinalizer(gateserver, gateserverFinalizer)
-		if err := r.Update(ctx, gateserver); err != nil {
+	if !controllerutil.ContainsFinalizer(s, gateserverFinalizer) {
+		controllerutil.AddFinalizer(s, gateserverFinalizer)
+		if err := r.Update(ctx, s); err != nil {
 			r.Log.Info("Failed to add finalizer", "err", err)
 			return ctrl.Result{}, nil
 		}
 	}
 
 	// Set status to Ready
-	t := metav1.Time{Time: time.Now()}
-	gateserver.Status.Phase = "Ready"
+	now := metav1.Time{Time: time.Now()}
+	s.Status.Phase = "Ready"
 	condition := metav1.Condition{
 		Type:               "Created",
 		Status:             "True",
 		Reason:             "AllResourcesCreated",
 		Message:            "All resources created",
-		LastTransitionTime: t,
+		LastTransitionTime: now,
 	}
-	gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-	if err := r.Status().Update(ctx, gateserver); err != nil {
+	s.Status.Conditions = append(s.Status.Conditions, condition)
+	if err := r.Status().Update(ctx, s); err != nil {
 		r.Log.Info("Failed to update status", "err", err)
 	}
 
@@ -200,14 +200,16 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 		errs = append(errs, err)
 	}
 
-	clusterRoleBinding := &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: s.Name,
-		},
-	}
-	if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
-		r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
-		errs = append(errs, err)
+	if s.Spec.ServiceAccountNamespace == "*" {
+		clusterRoleBinding := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: s.Name,
+			},
+		}
+		if err := r.Delete(ctx, clusterRoleBinding, opts); err != nil {
+			r.Log.Info("Failed to finalize clusterRoleBinding", "err", err)
+			errs = append(errs, err)
+		}
 	}
 
 	r.Log.Info("Deleting oauthclient...")
