@@ -65,9 +65,9 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	}
 
 	r.Log.Info("Create cluster role.")
-	role, _ := proxy.ClusterRole(s)
-	controllerutil.SetControllerReference(s, role, r.Scheme)
-	if err := r.Client.Create(ctx, role); err != nil {
+	clusterrole, _ := proxy.ClusterRole(s)
+	controllerutil.SetControllerReference(s, clusterrole, r.Scheme)
+	if err := r.Client.Create(ctx, clusterrole); err != nil {
 		return err
 	}
 
