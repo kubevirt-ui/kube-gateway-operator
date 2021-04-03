@@ -75,6 +75,11 @@ spec:
                 items:
                   type: string
                 type: array
+              serviceAccountNamespace:
+                default: '*'
+                description: serviceAccountNamespace of the rule. "*" represents all
+                  namespaces. Defalut value is "*".
+                type: string
               serviceAccountNonResourceURLs:
                 description: serviceAccountNonResourceURLs is a set of partial urls
                   that a user should have access to. *s are allowed, but only as the
@@ -121,11 +126,6 @@ spec:
                 items:
                   type: string
                 type: array
-              serviceAccountnamespace:
-                default: '*'
-                description: serviceAccountnamespace of the rule. "*" represents all
-                  namespaces. Defalut value is "*".
-                type: string
               webAppImage:
                 default: ""
                 description: webAppImage is the oc gate proxy web application image

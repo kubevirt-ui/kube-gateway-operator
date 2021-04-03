@@ -45,12 +45,12 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:MaxLength=226
 	Route string `json:"route,omitempty"`
 
-	// serviceAccountnamespace of the rule. "*" represents all namespaces.
+	// serviceAccountNamespace of the rule. "*" represents all namespaces.
 	// Defalut value is "*".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:default:="*"
-	ServiceAccountNamespace string `json:"serviceAccountnamespace,omitempty"`
+	ServiceAccountNamespace string `json:"serviceAccountNamespace,omitempty"`
 
 	// serviceAccountVerbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions contained in this rule.
 	// VerbAll represents all kinds.
