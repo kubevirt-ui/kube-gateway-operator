@@ -47,7 +47,6 @@ func ClusterRoleBinding(s *ocgatev1beta1.GateToken) (*rbacv1.ClusterRoleBinding,
 			Name:     s.Name,
 		},
 	}
-	//controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
 
 	return rolebinding, nil
 }

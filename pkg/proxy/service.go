@@ -54,7 +54,6 @@ func Service(s *ocgatev1beta1.GateServer) (*corev1.Service, error) {
 			},
 		},
 	}
-	//controllerutil.SetControllerReference(s, service, r.Scheme)
 
 	return service, nil
 }

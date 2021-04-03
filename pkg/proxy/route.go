@@ -52,7 +52,6 @@ func Route(s *ocgatev1beta1.GateServer) (*routev1.Route, error) {
 			WildcardPolicy: routev1.WildcardPolicyNone,
 		},
 	}
-	//controllerutil.SetControllerReference(s, route, r.Scheme)
 
 	return route, nil
 }

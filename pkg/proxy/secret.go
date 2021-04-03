@@ -61,7 +61,6 @@ func Secret(s *ocgatev1beta1.GateServer) (*corev1.Secret, error) {
 			"key.pem":  privateKeyBytes,
 		},
 	}
-	//controllerutil.SetControllerReference(s, secret, r.Scheme)
 
 	return secret, nil
 }

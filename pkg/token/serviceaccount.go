@@ -38,7 +38,6 @@ func ServiceAccount(s *ocgatev1beta1.GateToken) (*corev1.ServiceAccount, error) 
 			},
 		},
 	}
-	//controllerutil.SetControllerReference(s, serviceaccount, r.Scheme)
 
 	return serviceaccount, nil
 }

@@ -86,8 +86,6 @@ func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
 		},
 	}
 
-	//controllerutil.SetControllerReference(s, deployment, r.Scheme)
-
 	return deployment, nil
 }
 

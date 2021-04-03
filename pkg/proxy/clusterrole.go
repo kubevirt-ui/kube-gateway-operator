@@ -44,7 +44,6 @@ func ClusterRole(s *ocgatev1beta1.GateServer) (*rbacv1.ClusterRole, error) {
 			},
 		},
 	}
-	//controllerutil.SetControllerReference(s, role, r.Scheme)
 
 	return role, nil
 }

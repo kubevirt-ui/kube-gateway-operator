@@ -49,7 +49,6 @@ func RoleBinding(s *ocgatev1beta1.GateToken) (*rbacv1.RoleBinding, error) {
 			Name:     s.Name,
 		},
 	}
-	//controllerutil.SetControllerReference(s, rolebinding, r.Scheme)
 
 	return rolebinding, nil
 }
