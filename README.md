@@ -36,7 +36,7 @@ kubectl create namespace kube-gateway
 curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/virt-gateway-server.yaml \
     -o kube-gateway-server.yaml
 
-vmi kube-gateway-server.yaml
+vim kube-gateway-server.yaml
 kubectl create -f kube-gateway-server.yaml
 ```
 
@@ -52,10 +52,6 @@ curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/
 vim virt-gateway-operator.yaml
 kubectl create -f virt-gateway-operator.yaml
 ```
-
-#### GateToken demo:
-
-[![asciicast](https://asciinema.org/a/397136.svg)](https://asciinema.org/a/397136)
 
 ## Example GateToken CR
 
