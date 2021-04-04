@@ -1,0 +1,20 @@
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateServer
+metadata:
+  name: kube-gateway-server
+  namespace: kube-gateway
+spec:
+  apiURL: "https://kubernetes.default.svc"
+  route: kube-gateway-proxy.apps-crc.testing
+  serviceAccountVerbs:
+    - "get"
+    - "watch"
+    - "list"
+  serviceAccountAPIGroups:
+    - "*"
+  serviceAccountResources:
+    - "*"
+  gnerateSecret: true
+  passThrough: false
+  image: "quay.io/yaacov/kube-gateway:latest"
+  webAppImage: "quay.io/yaacov/kube-gateway-web-app-novnc:latest"
