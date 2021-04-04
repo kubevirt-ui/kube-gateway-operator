@@ -4,6 +4,7 @@ metadata:
   name: gatetoken-sample
   namespace: kube-gateway
 spec:
+  namespace: "default"
   APIGroups:
     - "subresources.kubevirt.io"
   resources:

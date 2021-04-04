@@ -8,12 +8,10 @@ spec:
   route: kube-gateway-proxy.apps-crc.testing
   serviceAccountVerbs:
     - "get"
-    - "watch"
-    - "list"
   serviceAccountAPIGroups:
-    - "*"
+    - "subresources.kubevirt.io"
   serviceAccountResources:
-    - "*"
+    - "virtualmachineinstances"
   gnerateSecret: true
   passThrough: false
   image: "quay.io/yaacov/kube-gateway:latest"
