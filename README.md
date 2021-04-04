@@ -26,14 +26,14 @@ kubectl create -f \
     https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/virt-gateway-operator.yaml
 ```
 
-#### Deploy a gate server
+### Deploy a gate server
 
 ``` bash
 # Create a namespace to run the gate server.
 kubectl create namespace kube-gateway
 
 # Download and customize the kube-gateway-server example.
-curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/kube-gateway-server.yaml \
+curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/virt-gateway-server.yaml \
     -o kube-gateway-server.yaml
 
 vmi kube-gateway-server.yaml
@@ -68,10 +68,14 @@ metadata:
   name: gatetoken-sample
   namespace: kube-gateway
 spec:
-  verbs:
-    - "get"
-  nonResourceURLs:
-    - "/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc"
+  namespace: "default"
+  APIGroups:
+    - "subresources.kubevirt.io"
+  resources:
+    - "virtualmachineinstances"
+  resourceNames:
+    - testvm
+  generateServiceAccount: false
 ```
 
 ## Example GateServer CR
@@ -86,7 +90,6 @@ metadata:
   name: gateserver-sample
   namespace: kube-gateway
 spec:
-  apiURL: 'https://kubernetes.default.svc'
   route: kube-gateway-proxy.apps-crc.testing
   # serviceAccount fields are used to create a service account for the oc gate proxy.
   # The proxy will run using this service account, it will be abale to
@@ -94,12 +97,10 @@ spec:
   # proxy to access all k8s resources that the web application will consume.
   serviceAccountVerbs:
     - "get"
-    - "watch"
-    - "list"
   serviceAccountAPIGroups:
-    - '*'
+    - "subresources.kubevirt.io"
   serviceAccountResources:
-    - '*'
+    - "virtualmachineinstances"
   # gnerateSecret is used to automatically create a secret holding the asymetrical
   # keys needed to sign and authenticate the JWT tokens.
   gnerateSecret: true
@@ -107,9 +108,9 @@ spec:
   # without authenticating and replacing with the service account access token of the proxy.
   passThrough: false
   # the proxy server container image
-  image: 'quay.io/yaacov/kube-gateway:latest'
+  image: 'quay.io/yaacov/kube-gateway'
   # webAppImage is used to customize the static files of your web app.
   # this example will install the noVNC web application that consume
   # websockets streaming VNC data.
-  webAppImage: 'quay.io/yaacov/kube-gateway-web-app-novnc:latest'
+  webAppImage: 'quay.io/yaacov/kube-gateway-web-app-novnc'
 ```
