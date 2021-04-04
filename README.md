@@ -98,6 +98,7 @@ spec:
     - "subresources.kubevirt.io"
   serviceAccountResources:
     - "virtualmachineinstances"
+    - "virtualmachineinstances/vnc"
   # gnerateSecret is used to automatically create a secret holding the asymetrical
   # keys needed to sign and authenticate the JWT tokens.
   gnerateSecret: true
