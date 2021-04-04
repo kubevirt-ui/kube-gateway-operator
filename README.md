@@ -69,6 +69,7 @@ spec:
     - "subresources.kubevirt.io"
   resources:
     - "virtualmachineinstances"
+    - "virtualmachineinstances/vnc"
   resourceNames:
     - testvm
   generateServiceAccount: false
