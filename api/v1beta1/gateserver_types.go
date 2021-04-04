@@ -106,11 +106,11 @@ type GateServerSpec struct {
 	PassThrough bool `json:"passThrough,omitempty"`
 
 	// image is the oc gate proxy image to use.
-	// Defalut value is "quay.io/yaacov/oc-gate:latest".
+	// Defalut value is "quay.io/yaacov/kube-gateway:latest".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:="quay.io/yaacov/oc-gate:latest"
+	// +kubebuilder:default:="quay.io/yaacov/kube-gateway:latest"
 	Image string `json:"image,omitempty"`
 
 	// webAppImage is the oc gate proxy web application image to use,
@@ -127,7 +127,7 @@ type GateServerSpec struct {
 	WebAppImage string `json:"webAppImage,omitempty"`
 
 	// generateSecret determain if a secrete with public and private kes will be automatically
-	// generated when the oc-gate server is created.
+	// generated when the kube-gateway server is created.
 	// Defalut value is true.
 	// +optional
 	// +kubebuilder:validation:Optional

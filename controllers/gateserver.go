@@ -24,8 +24,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
-	"github.com/yaacov/oc-gate-operator/pkg/proxy"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
+	"github.com/yaacov/virt-gateway-operator/pkg/proxy"
 )
 
 func setServerCondition(s *ocgatev1beta1.GateServer, reason string, err error) {

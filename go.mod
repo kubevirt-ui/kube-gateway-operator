@@ -1,4 +1,4 @@
-module github.com/yaacov/oc-gate-operator
+module github.com/yaacov/virt-gateway-operator
 
 go 1.15
 

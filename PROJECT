@@ -1,7 +1,7 @@
 domain: yaacov.com
 layout: go.kubebuilder.io/v3
-projectName: oc-gate-operator
-repo: github.com/yaacov/oc-gate-operator
+projectName: virt-gateway-operator
+repo: github.com/yaacov/virt-gateway-operator
 resources:
 - crdVersion: v1
   group: ocgate

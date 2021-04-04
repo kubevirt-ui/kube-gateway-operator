@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
 )
 
 // Deployment is a
@@ -57,7 +57,7 @@ func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
 
 					Volumes: []corev1.Volume{
 						{
-							Name: "oc-gate-secret",
+							Name: "kube-gateway-secret",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: fmt.Sprintf("%s-secret", s.Name),
@@ -65,10 +65,10 @@ func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
 							},
 						},
 						{
-							Name: "oc-gate-jwt-secret",
+							Name: "kube-gateway-jwt-secret",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: "oc-gate-jwt-secret",
+									SecretName: "kube-gateway-jwt-secret",
 								},
 							},
 						},
@@ -97,7 +97,7 @@ func initContainers(s *ocgatev1beta1.GateServer) []corev1.Container {
 
 	containers := []corev1.Container{{
 		Image: s.Spec.WebAppImage,
-		Name:  "oc-gate-web-app",
+		Name:  "kube-gateway-web-app",
 
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -116,11 +116,11 @@ func initContainers(s *ocgatev1beta1.GateServer) []corev1.Container {
 func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 	volumeMounts := []corev1.VolumeMount{
 		{
-			Name:      "oc-gate-secret",
+			Name:      "kube-gateway-secret",
 			MountPath: "/secrets",
 		},
 		{
-			Name:      "oc-gate-jwt-secret",
+			Name:      "kube-gateway-jwt-secret",
 			MountPath: "/jwt-secret",
 		},
 	}
@@ -137,15 +137,15 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 
 	containers := []corev1.Container{{
 		Image: s.Spec.Image,
-		Name:  "oc-gate",
+		Name:  "kube-gateway",
 
 		Ports: []corev1.ContainerPort{{
 			ContainerPort: 8080,
-			Name:          "oc-gate-https",
+			Name:          "https",
 		}},
 		VolumeMounts: volumeMounts,
 		Command: []string{
-			"./oc-gate",
+			"./kube-gateway",
 			fmt.Sprintf("-api-server=%s", s.Spec.APIURL),
 			"-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt",
 			"-cert-file=/secrets/tls.crt",

@@ -2,16 +2,12 @@ apiVersion: ocgate.yaacov.com/v1beta1
 kind: GateToken
 metadata:
   name: gatetoken-sample
-  namespace: oc-gate
+  namespace: kube-gateway
 spec:
-  verbs:
-    - "get"
-    - "watch"
-    - "list"
   APIGroups:
-    - ""
-    - "kubevirt.io/v1alpha3"
+    - "subresources.kubevirt.io"
   resources:
-    - "pods"
     - "virtualmachineinstances"
+  resourceNames:
+    - testvm
   generateServiceAccount: false

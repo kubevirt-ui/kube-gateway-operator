@@ -33,8 +33,8 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
-	"github.com/yaacov/oc-gate-operator/pkg/token"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
+	"github.com/yaacov/virt-gateway-operator/pkg/token"
 )
 
 const gatetokenFinalizer = "ocgate.yaacov.com/finalizer"
@@ -342,7 +342,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Set gate-token access code
 	// Get private key secret
 	if !t.Spec.GenerateServiceAccount {
-		key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", t.Namespace, "key.pem")
+		key, err := getSecret(ctx, r.Client, "kube-gateway-jwt-secret", t.Namespace, "key.pem")
 		if err != nil {
 			r.Log.Info("Can't read private key secret", "err", err)
 

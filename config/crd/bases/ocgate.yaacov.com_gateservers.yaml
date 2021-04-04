@@ -45,13 +45,13 @@ spec:
               generateSecret:
                 default: true
                 description: generateSecret determain if a secrete with public and
-                  private kes will be automatically generated when the oc-gate server
-                  is created. Defalut value is true.
+                  private kes will be automatically generated when the kube-gateway
+                  server is created. Defalut value is true.
                 type: boolean
               image:
-                default: quay.io/yaacov/oc-gate:latest
+                default: quay.io/yaacov/kube-gateway:latest
                 description: image is the oc gate proxy image to use. Defalut value
-                  is "quay.io/yaacov/oc-gate:latest".
+                  is "quay.io/yaacov/kube-gateway:latest".
                 maxLength: 1024
                 type: string
               passThrough:

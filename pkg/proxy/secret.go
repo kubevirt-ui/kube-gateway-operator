@@ -27,7 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
 )
 
 // Secret is a
@@ -67,7 +67,7 @@ func Secret(s *ocgatev1beta1.GateServer) (*corev1.Secret, error) {
 
 // JWTSecretName is the name of the secret holding the private and public SSH keys
 // for authenticating the JWT access codes.
-const JWTSecretName = "oc-gate-jwt-secret"
+const JWTSecretName = "kube-gateway-jwt-secret"
 
 // generatePrivateKey creates a RSA Private Key of specified byte size
 func generatePrivateKey(bitSize int) (*rsa.PrivateKey, error) {

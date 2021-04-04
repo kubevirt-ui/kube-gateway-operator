@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 

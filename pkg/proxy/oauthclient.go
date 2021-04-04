@@ -22,7 +22,7 @@ import (
 	oauthv1 "github.com/openshift/api/oauth/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	ocgatev1beta1 "github.com/yaacov/virt-gateway-operator/api/v1beta1"
 )
 
 // OAuthClient is a
