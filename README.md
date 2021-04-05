@@ -9,7 +9,7 @@
 The virt-gateway-operator operates the [kube-gateway](https://github.com/yaacov/kube-gateway) service and access tokens on a cluster.
 
 The kube-gateway service allows non-k8s users access to a single k8s resource for a limited time.
-It uses signed, limited duration JWTs to grant non-k8s users access to the cluster via a proxy server.
+It uses signed, limited duration [JWT](https://jwt.io/) to grant non-k8s users access to the cluster via a proxy server.
 
 Once installed, the operator manages two custom resources:
 
