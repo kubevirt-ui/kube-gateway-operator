@@ -57,8 +57,7 @@ spec:
 
 ## Example GateServer CR
 
-After the operator is set, users need to set up a gate server. This example will create a kube-gateway proxy server that listens for requests at "https://test-proxy.apps.ostest.test.metalkube.org". A single gate server can handle requests for resources from different users and across different namespaces.
-
+A single gate server can handle requests for resources from different users and across different namespaces.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
