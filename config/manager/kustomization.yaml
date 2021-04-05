@@ -11,6 +11,6 @@ configMapGenerator:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
-- digest: sha256:9249bf85d9b26882dc8cac5eec4512fd267093ba957cfb13f1f71dcf6dd3fbc8
-  name: controller
+- name: controller
   newName: quay.io/yaacov/virt-gateway-operator
+  newTag: v0.0.1

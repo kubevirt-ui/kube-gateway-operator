@@ -48,8 +48,8 @@ spec:
                 description: generateSecret determain if a secrete with public and private kes will be automatically generated when the kube-gateway server is created. Defalut value is true.
                 type: boolean
               image:
-                default: quay.io/yaacov/kube-gateway:latest
-                description: image is the oc gate proxy image to use. Defalut value is "quay.io/yaacov/kube-gateway:latest".
+                default: quay.io/yaacov/kube-gateway
+                description: image is the oc gate proxy image to use. Defalut value is "quay.io/yaacov/kube-gateway".
                 maxLength: 1024
                 type: string
               passThrough:
@@ -62,7 +62,9 @@ spec:
                 pattern: ^([a-z0-9-_])+[.]([a-z0-9-_])+[.]([a-z0-9-._])+$
                 type: string
               serviceAccountAPIGroups:
-                description: serviceAccountAPIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [].
+                default:
+                - subresources.kubevirt.io
+                description: serviceAccountAPIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is ["subresources.kubevirt.io"].
                 items:
                   type: string
                 type: array
@@ -81,7 +83,10 @@ spec:
                   type: string
                 type: array
               serviceAccountResources:
-                description: serviceAccountResources is a list of resources this rule applies to. '*' represents all resources in the specified apiGroups. '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [].
+                default:
+                - virtualmachineinstances
+                - virtualmachineinstances/vnc
+                description: serviceAccountResources is a list of resources this rule applies to. '*' represents all resources in the specified apiGroups. '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is ["virtualmachineinstances","virtualmachineinstances/vnc"].
                 items:
                   type: string
                 type: array
@@ -93,8 +98,8 @@ spec:
                   type: string
                 type: array
               webAppImage:
-                default: ""
-                description: webAppImage is the oc gate proxy web application image to use, It's an image including the static web application to be served together with k8s API. The static web application should be in the directory "/data/web/public/" and it will be copied to the proxy servers "/web/public/" directory on pproxy startup. If left empty, the proxies default web application will not be replaced. Defalut value is "" (use default web application).
+                default: quay.io/yaacov/kube-gateway-web-app-novnc
+                description: webAppImage is the oc gate proxy web application image to use, It's an image including the static web application to be served together with k8s API. The static web application should be in the directory "/data/web/public/" and it will be copied to the proxy servers "/web/public/" directory on pproxy startup. If left empty, the proxies default web application will not be replaced. Defalut value is "quay.io/yaacov/kube-gateway-web-app-novnc".
                 maxLength: 1024
                 type: string
             type: object
@@ -197,7 +202,9 @@ spec:
             description: GateTokenSpec defines the desired state of GateToken
             properties:
               APIGroups:
-                description: APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [].
+                default:
+                - subresources.kubevirt.io
+                description: APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [subresources.kubevirt.io].
                 items:
                   type: string
                 type: array
@@ -230,7 +237,10 @@ spec:
                   type: string
                 type: array
               resources:
-                description: resources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups. '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is [].
+                default:
+                - virtualmachineinstances
+                - virtualmachineinstances/vnc
+                description: resources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups. '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups. APIGroups is the name of the APIGroup that contains the resources. If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. Defalut value is ["virtualmachineinstances","virtualmachineinstances/vnc"].
                 items:
                   type: string
                 type: array
@@ -733,7 +743,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/virt-gateway-operator@sha256:9249bf85d9b26882dc8cac5eec4512fd267093ba957cfb13f1f71dcf6dd3fbc8
+        image: quay.io/yaacov/virt-gateway-operator@sha256:275323296786a1c0c61e5778e3d2850dfe446274929c3654532da54a1d55becd
         livenessProbe:
           httpGet:
             path: /healthz

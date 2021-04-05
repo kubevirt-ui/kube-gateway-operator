@@ -64,18 +64,20 @@ type GateServerSpec struct {
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
 	// APIGroups is the name of the APIGroup that contains the resources.
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
-	// Defalut value is [].
+	// Defalut value is ["subresources.kubevirt.io"].
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"subresources.kubevirt.io"}
 	ServiceAccountAPIGroups []string `json:"serviceAccountAPIGroups,omitempty"`
 
 	// serviceAccountResources is a list of resources this rule applies to. '*' represents all resources in the specified apiGroups.
 	// '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups.
 	// APIGroups is the name of the APIGroup that contains the resources.
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
-	// Defalut value is [].
+	// Defalut value is ["virtualmachineinstances","virtualmachineinstances/vnc"].
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"virtualmachineinstances","virtualmachineinstances/vnc"}
 	ServiceAccountResources []string `json:"serviceAccountResources,omitempty"`
 
 	// serviceAccountResourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
@@ -106,11 +108,11 @@ type GateServerSpec struct {
 	PassThrough bool `json:"passThrough,omitempty"`
 
 	// image is the oc gate proxy image to use.
-	// Defalut value is "quay.io/yaacov/kube-gateway:latest".
+	// Defalut value is "quay.io/yaacov/kube-gateway".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:="quay.io/yaacov/kube-gateway:latest"
+	// +kubebuilder:default:="quay.io/yaacov/kube-gateway"
 	Image string `json:"image,omitempty"`
 
 	// webAppImage is the oc gate proxy web application image to use,
@@ -119,11 +121,11 @@ type GateServerSpec struct {
 	// The static web application should be in the directory "/data/web/public/"
 	// and it will be copied to the proxy servers "/web/public/" directory on pproxy
 	// startup. If left empty, the proxies default web application will not be replaced.
-	// Defalut value is "" (use default web application).
+	// Defalut value is "quay.io/yaacov/kube-gateway-web-app-novnc".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:=""
+	// +kubebuilder:default:="quay.io/yaacov/kube-gateway-web-app-novnc"
 	WebAppImage string `json:"webAppImage,omitempty"`
 
 	// generateSecret determain if a secrete with public and private kes will be automatically

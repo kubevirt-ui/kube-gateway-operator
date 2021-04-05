@@ -89,18 +89,20 @@ type GateTokenSpec struct {
 
 	// APIGroups is the name of the APIGroup that contains the resources.
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
-	// Defalut value is [].
+	// Defalut value is [subresources.kubevirt.io].
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"subresources.kubevirt.io"}
 	APIGroups []string `json:"APIGroups,omitempty"`
 
 	// resources is a list of resources this rule applies to.  '*' represents all resources in the specified apiGroups.
 	// '*/foo' represents the subresource 'foo' for all resources in the specified apiGroups.
 	// APIGroups is the name of the APIGroup that contains the resources.
 	// If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed.
-	// Defalut value is [].
+	// Defalut value is ["virtualmachineinstances","virtualmachineinstances/vnc"].
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="array"
+	// +kubebuilder:default:={"virtualmachineinstances","virtualmachineinstances/vnc"}
 	Resources []string `json:"resources,omitempty"`
 
 	// resourceNames is an optional white list of names that the rule applies to.  An empty set means that everything is allowed.
