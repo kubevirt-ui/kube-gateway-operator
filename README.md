@@ -30,10 +30,11 @@ kubectl create -f \
 # Create a namespace to run the gate server
 kubectl create namespace kube-gateway
 
-# Download and customize the kube-gateway-server example
+# Download the kube-gateway-server example
 curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/virt-gateway-server.yaml \
     -o kube-gateway-server.yaml
 
+# Customize and deploy the kube-gateway-server example
 vim kube-gateway-server.yaml
 kubectl create -f kube-gateway-server.yaml
 ```
