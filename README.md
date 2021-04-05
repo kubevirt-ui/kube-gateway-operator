@@ -38,19 +38,6 @@ vim kube-gateway-server.yaml
 kubectl create -f kube-gateway-server.yaml
 ```
 
-### Disconnected clusters
-
-If the system is in a disconnected environment, without access to the public image repository, edit the yaml examples to use internally provided container images.
-
-``` bash
-# Edit the operator image in operator-controller-manager.yaml
-curl https://raw.githubusercontent.com/yaacov/virt-gateway-operator/main/deploy/virt-gateway-operator.yaml \
-    -o virt-gateway-operator.yaml
-
-vim virt-gateway-operator.yaml
-kubectl create -f virt-gateway-operator.yaml
-```
-
 ## Example GateToken CR
 
 This example will generate a token that will give its holder access to API calls matching the path `/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/testvm/vnc` for one hour. You can edit the route to match the route designated for the gate server on your cluster.
