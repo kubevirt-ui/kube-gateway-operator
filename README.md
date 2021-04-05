@@ -53,7 +53,7 @@ kubectl create -f virt-gateway-operator.yaml
 
 ## Example GateToken CR
 
-This example will generate a token that will give its holder access to API calls matching the path "/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc" for one hour. You can edit the route to match the route designated for the gate server on your cluster.
+This example will generate a token that will give its holder access to API calls matching the path `/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/testvm/vnc` for one hour. You can edit the route to match the route designated for the gate server on your cluster.
 
 ```yaml
 apiVersion: ocgate.yaacov.com/v1beta1
@@ -63,14 +63,8 @@ metadata:
   namespace: kube-gateway
 spec:
   namespace: "default"
-  APIGroups:
-    - "subresources.kubevirt.io"
-  resources:
-    - "virtualmachineinstances"
-    - "virtualmachineinstances/vnc"
   resourceNames:
     - testvm
-  generateServiceAccount: false
 ```
 
 ## Example GateServer CR
