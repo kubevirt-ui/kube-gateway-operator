@@ -44,6 +44,7 @@ func Service(s *ocgatev1beta1.GateServer) (*corev1.Service, error) {
 			Annotations: annotations,
 		},
 		Spec: corev1.ServiceSpec{
+			Type:     corev1.ServiceTypeLoadBalancer,
 			Selector: labels,
 			Ports: []corev1.ServicePort{
 				{

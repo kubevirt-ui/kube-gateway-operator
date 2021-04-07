@@ -42,10 +42,21 @@ spec:
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
+              generateOauthClient:
+                default: false
+                description: generateOauthClient determain if oauthclient for Openshifts
+                  Oauth2 issuer will be created. Defalut value is false.
+                type: boolean
+              generateRoute:
+                default: false
+                description: generateRoute determain if Openshift route will be created
+                  for the proxy service, if a route is not created, the operator will
+                  try to create k8s ingress for proxy service. Defalut value is false.
+                type: boolean
               generateSecret:
                 default: true
                 description: generateSecret determain if a secrete with public and
-                  private kes will be automatically generated when the kube-gateway
+                  private keys will be automatically generated when the kube-gateway
                   server is created. Defalut value is true.
                 type: boolean
               image:

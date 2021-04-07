@@ -128,7 +128,7 @@ type GateServerSpec struct {
 	// +kubebuilder:default:="quay.io/yaacov/kube-gateway-web-app-novnc"
 	WebAppImage string `json:"webAppImage,omitempty"`
 
-	// generateSecret determain if a secrete with public and private kes will be automatically
+	// generateSecret determain if a secrete with public and private keys will be automatically
 	// generated when the kube-gateway server is created.
 	// Defalut value is true.
 	// +optional
@@ -136,6 +136,25 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:Type="boolean"
 	// +kubebuilder:default:=true
 	GenerateSecret bool `json:"generateSecret,omitempty"`
+
+	// generateOauthClient determain if oauthclient for Openshifts Oauth2 issuer
+	// will be created.
+	// Defalut value is false.
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="boolean"
+	// +kubebuilder:default:=false
+	GenerateOauthClient bool `json:"generateOauthClient,omitempty"`
+
+	// generateRoute determain if Openshift route will be created for the proxy service,
+	// if a route is not created, the operator will try to create k8s ingress for
+	// proxy service.
+	// Defalut value is false.
+	// +optional
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="boolean"
+	// +kubebuilder:default:=false
+	GenerateRoute bool `json:"generateRoute,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer

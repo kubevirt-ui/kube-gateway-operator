@@ -50,10 +50,19 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 		return err
 	}
 
-	route, _ := proxy.Route(s)
-	controllerutil.SetControllerReference(s, route, r.Scheme)
-	if err := r.Client.Create(ctx, route); err != nil {
-		return err
+	// Create Route or Ingress to the proxy service
+	if s.Spec.GenerateRoute {
+		route, _ := proxy.Route(s)
+		controllerutil.SetControllerReference(s, route, r.Scheme)
+		if err := r.Client.Create(ctx, route); err != nil {
+			return err
+		}
+	} else {
+		ingress, _ := proxy.Ingress(s)
+		controllerutil.SetControllerReference(s, ingress, r.Scheme)
+		if err := r.Client.Create(ctx, ingress); err != nil {
+			return err
+		}
 	}
 
 	// Create the service account and roles
@@ -104,11 +113,13 @@ func (r *GateServerReconciler) buildServer(ctx context.Context, s *ocgatev1beta1
 	}
 
 	// Create the oauthclient
-	r.Log.Info("Create oauthclient.")
-	oauthclient, _ := proxy.OAuthClient(s)
-	controllerutil.SetControllerReference(s, oauthclient, r.Scheme)
-	if err := r.Client.Create(ctx, oauthclient); err != nil {
-		return err
+	if s.Spec.GenerateOauthClient {
+		r.Log.Info("Create oauthclient.")
+		oauthclient, _ := proxy.OAuthClient(s)
+		controllerutil.SetControllerReference(s, oauthclient, r.Scheme)
+		if err := r.Client.Create(ctx, oauthclient); err != nil {
+			return err
+		}
 	}
 
 	return nil

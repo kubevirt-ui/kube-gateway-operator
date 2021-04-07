@@ -35,6 +35,37 @@ func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
 	matchlabels := map[string]string{
 		"app": s.Name,
 	}
+	voluems := []corev1.Volume{
+		{
+			Name: "kube-gateway-jwt-secret",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: "kube-gateway-jwt-secret",
+				},
+			},
+		},
+		{
+			Name: "web-application",
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
+			},
+		},
+	}
+
+	// If using Openshift routes, use command to generate https server
+	// and add a secret holding the server certifcates
+	if s.Spec.GenerateRoute {
+		webAppVoluems := corev1.Volume{
+			Name: "kube-gateway-secret",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: fmt.Sprintf("%s-secret", s.Name),
+				},
+			},
+		}
+
+		voluems = append(voluems, webAppVoluems)
+	}
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -52,34 +83,9 @@ func Deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
 					Labels: matchlabels,
 				},
 				Spec: corev1.PodSpec{
-					InitContainers: initContainers(s),
-					Containers:     containers(s),
-
-					Volumes: []corev1.Volume{
-						{
-							Name: "kube-gateway-secret",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: fmt.Sprintf("%s-secret", s.Name),
-								},
-							},
-						},
-						{
-							Name: "kube-gateway-jwt-secret",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: "kube-gateway-jwt-secret",
-								},
-							},
-						},
-						{
-							Name: "web-application",
-							VolumeSource: corev1.VolumeSource{
-								EmptyDir: &corev1.EmptyDirVolumeSource{},
-							},
-						},
-					},
-
+					InitContainers:     initContainers(s),
+					Containers:         containers(s),
+					Volumes:            voluems,
 					ServiceAccountName: s.Name,
 				},
 			},
@@ -116,13 +122,36 @@ func initContainers(s *ocgatev1beta1.GateServer) []corev1.Container {
 func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 	volumeMounts := []corev1.VolumeMount{
 		{
-			Name:      "kube-gateway-secret",
-			MountPath: "/secrets",
-		},
-		{
 			Name:      "kube-gateway-jwt-secret",
 			MountPath: "/jwt-secret",
 		},
+	}
+
+	commandHTTPS := []string{
+		"./kube-gateway",
+		fmt.Sprintf("-api-server=%s", s.Spec.APIURL),
+		"-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt",
+		"-cert-file=/secrets/tls.crt",
+		"-key-file=/secrets/tls.key",
+		fmt.Sprintf("-base-address=https://%s", s.Spec.Route),
+		"-listen=https://0.0.0.0:8080",
+		"-jwt-token-key-file=/jwt-secret/cert.pem",
+		"-k8s-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
+		fmt.Sprintf("-k8s-bearer-token-passthrough=%v", s.Spec.PassThrough),
+		fmt.Sprintf("-oauth-client-id=%s", s.Name),
+		fmt.Sprintf("-oauth-client-secret=%s-oauth-secret", s.Name),
+	}
+
+	commandHTTP := []string{
+		"./kube-gateway",
+		fmt.Sprintf("-api-server=%s", s.Spec.APIURL),
+		"-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+		"-oauth-server-disable",
+		fmt.Sprintf("-base-address=https://%s", s.Spec.Route),
+		"-listen=http://0.0.0.0:8080",
+		"-jwt-token-key-file=/jwt-secret/cert.pem",
+		"-k8s-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
+		fmt.Sprintf("-k8s-bearer-token-passthrough=%v", s.Spec.PassThrough),
 	}
 
 	// If using a web app, add the web app volume mount
@@ -135,6 +164,19 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 		volumeMounts = append(volumeMounts, webAppVolumeMount)
 	}
 
+	// If using Openshift routes, use command to generate https server
+	// and add a secret holding the server certifcates
+	command := commandHTTP
+	if s.Spec.GenerateRoute {
+		command = commandHTTPS
+
+		webAppVolumeMount := corev1.VolumeMount{
+			Name:      "kube-gateway-secret",
+			MountPath: "/secrets",
+		}
+		volumeMounts = append(volumeMounts, webAppVolumeMount)
+	}
+
 	containers := []corev1.Container{{
 		Image: s.Spec.Image,
 		Name:  "kube-gateway",
@@ -144,20 +186,7 @@ func containers(s *ocgatev1beta1.GateServer) []corev1.Container {
 			Name:          "https",
 		}},
 		VolumeMounts: volumeMounts,
-		Command: []string{
-			"./kube-gateway",
-			fmt.Sprintf("-api-server=%s", s.Spec.APIURL),
-			"-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt",
-			"-cert-file=/secrets/tls.crt",
-			"-key-file=/secrets/tls.key",
-			fmt.Sprintf("-base-address=https://%s", s.Spec.Route),
-			"-listen=https://0.0.0.0:8080",
-			"-jwt-token-key-file=/jwt-secret/cert.pem",
-			"-k8s-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
-			fmt.Sprintf("-k8s-bearer-token-passthrough=%v", s.Spec.PassThrough),
-			fmt.Sprintf("-oauth-client-id=%s", s.Name),
-			fmt.Sprintf("-oauth-client-secret=%s-oauth-secret", s.Name),
-		},
+		Command:      command,
 	}}
 
 	return containers

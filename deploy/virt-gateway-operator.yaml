@@ -43,9 +43,17 @@ spec:
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
+              generateOauthClient:
+                default: false
+                description: generateOauthClient determain if oauthclient for Openshifts Oauth2 issuer will be created. Defalut value is false.
+                type: boolean
+              generateRoute:
+                default: false
+                description: generateRoute determain if Openshift route will be created for the proxy service, if a route is not created, the operator will try to create k8s ingress for proxy service. Defalut value is false.
+                type: boolean
               generateSecret:
                 default: true
-                description: generateSecret determain if a secrete with public and private kes will be automatically generated when the kube-gateway server is created. Defalut value is true.
+                description: generateSecret determain if a secrete with public and private keys will be automatically generated when the kube-gateway server is created. Defalut value is true.
                 type: boolean
               image:
                 default: quay.io/yaacov/kube-gateway
@@ -466,6 +474,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - oauth.openshift.io
   resources:
   - oauthclients
@@ -743,7 +763,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/virt-gateway-operator@sha256:275323296786a1c0c61e5778e3d2850dfe446274929c3654532da54a1d55becd
+        image: quay.io/yaacov/virt-gateway-operator@sha256:00515a35ae3eec22e2b6ab14a1fca3feb8463002085a407c97223363da628ddc
         livenessProbe:
           httpGet:
             path: /healthz

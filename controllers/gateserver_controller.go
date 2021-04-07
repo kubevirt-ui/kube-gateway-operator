@@ -52,6 +52,7 @@ type GateServerReconciler struct {
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterroles,verbs=get;list;watch;create;update;patch;delete;deletecollection
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=clusterrolebindings,verbs=get;list;watch;create;update;patch;delete;deletecollection
+// +kubebuilder:rbac:groups="networking.k8s.io",resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="route.openshift.io",resources=routes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="route.openshift.io",resources=routes/custom-host,verbs=create;patch
 // +kubebuilder:rbac:groups="oauth.openshift.io",resources=oauthclients,verbs=get;list;watch;create;update;patch;delete
@@ -212,15 +213,17 @@ func (r *GateServerReconciler) finalizeGateServer(s *ocgatev1beta1.GateServer) e
 		}
 	}
 
-	r.Log.Info("Deleting oauthclient...")
-	oauthclient := &oauthv1.OAuthClient{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: s.Name,
-		},
-	}
-	if err := r.Delete(ctx, oauthclient, opts); err != nil {
-		r.Log.Info("Failed to finalize oauthclient", "err", err)
-		errs = append(errs, err)
+	if s.Spec.GenerateOauthClient {
+		r.Log.Info("Deleting oauthclient...")
+		oauthclient := &oauthv1.OAuthClient{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: s.Name,
+			},
+		}
+		if err := r.Delete(ctx, oauthclient, opts); err != nil {
+			r.Log.Info("Failed to finalize oauthclient", "err", err)
+			errs = append(errs, err)
+		}
 	}
 
 	if len(errs) != 0 {
