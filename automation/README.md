@@ -63,3 +63,13 @@ kubectl wait --timeout=180s --for=condition=Completed -n kube-gateway gatetoken/
 # test token1 with vm1
 google-chrome "https://kube-gateway-proxy.apps-crc.testing/auth/token?token=${jwt1}&then=/noVNC/vnc_lite.html?path=k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${vmnamespace}/virtualmachineinstances/${vmname1}/vnc"
 ```
+
+## Cleanup
+
+``` bash
+kubectl delete -f test_vm_01.yaml
+kubectl delete -f test_vm_02.yaml
+kubectl delete -f test_token_vm_01.yaml
+kubectl delete -f test_token_vm_02.yaml
+kubectl delete -f test_namespace.yaml
+```
