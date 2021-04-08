@@ -80,7 +80,7 @@ spec:
     - "virtualmachineinstances/vnc"
   # generateSecret is used to automatically create a secret holding the asymmetrical
   # keys needed to sign and authenticate the JWT tokens.
-  gnerateSecret: true
+  generateSecret: true
   # passThrough is used to pass the request token directly to the k8s API server without
   # authenticating and replaces it with the service account access token of the proxy
   passThrough: false

@@ -763,7 +763,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: quay.io/yaacov/virt-gateway-operator@sha256:00515a35ae3eec22e2b6ab14a1fca3feb8463002085a407c97223363da628ddc
+        image: quay.io/yaacov/virt-gateway-operator:latest
         livenessProbe:
           httpGet:
             path: /healthz

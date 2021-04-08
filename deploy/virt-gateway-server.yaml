@@ -13,7 +13,7 @@ spec:
   serviceAccountResources:
     - "virtualmachineinstances"
     - "virtualmachineinstances/vnc"
-  gnerateSecret: true
+  generateSecret: true
   passThrough: false
   image: "quay.io/yaacov/kube-gateway"
   webAppImage: "quay.io/yaacov/kube-gateway-web-app-novnc"
