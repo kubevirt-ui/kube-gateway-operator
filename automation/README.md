@@ -34,20 +34,20 @@ kubectl wait --timeout=180s --for=condition=Ready -n kube-gateway-test vmi/testv
 ## Create two tokens to access the noVNC web application
 
 ```bash
+# setup some helper variables
+export vmnamespace=kube-gateway-test
+export vmname1=testvm01
+export vmname2=testvm02
+
+# create tokens
 kubectl create -f test_token_vm_01.yaml
 kubectl create -f test_token_vm_02.yaml
 
 kubectl wait --timeout=180s --for=condition=Ready -n kube-gateway gatetoken/token-testvm01
 kubectl wait --timeout=180s --for=condition=Ready -n kube-gateway gatetoken/token-testvm02
 
-# setup some helper variables
-export vmnamespace=kube-gateway-test
-
 export jwt1=$(kubectl get gatetoken/token-testvm01 -n kube-gateway -o jsonpath="{.status.token}"); echo $jwt1
 export jwt2=$(kubectl get gatetoken/token-testvm02 -n kube-gateway -o jsonpath="{.status.token}"); echo $jwt2 
-
-export vmname1=testvm01
-export vmname2=testvm02
 
 # test token1 with vm1
 google-chrome "https://kube-gateway-proxy.apps-crc.testing/auth/token?token=${jwt1}&then=/noVNC/vnc_lite.html?path=k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${vmnamespace}/virtualmachineinstances/${vmname1}/vnc"

@@ -4,7 +4,7 @@ metadata:
   name: token-testvm02
   namespace: kube-gateway
 spec:
-  durationSec: 60
+  durationSec: 180
   namespace: "kube-gateway-test"
   resourceNames:
     - testvm02
