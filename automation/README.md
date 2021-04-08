@@ -63,6 +63,7 @@ google-chrome "https://kube-gateway-proxy.apps-crc.testing/auth/token?token=${jw
 google-chrome "https://kube-gateway-proxy.apps-crc.testing/auth/token?token=${jwt2}&then=/noVNC/vnc_lite.html?path=k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/${vmnamespace}/virtualmachineinstances/${vmname2}/vnc"
 
 # wait for token to expire
+kubectl get gatetoken token-testvm01 -o jsonpath="{.status.data.until}" -n kube-gateway 
 kubectl wait --timeout=180s --for=condition=Completed -n kube-gateway gatetoken/token-testvm01
 
 # test token1 with vm1
