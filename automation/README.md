@@ -73,11 +73,10 @@ google-chrome "https://kube-gateway-proxy.apps-crc.testing/auth/token?token=${jw
 
 ``` bash
 # delete VMs test namespace
-kubectl delete -f test_vm_01.yaml
-kubectl delete -f test_vm_02.yaml
-kubectl delete -f test_namespace.yaml
+kubectl delete vm --all -n kube-gateway-test
+kubectl delete vmi --all -n kube-gateway-test
+kubectl delete namespace kube-gateway-test
 
 # delete tokens
-kubectl delete -f test_token_vm_01.yaml
-kubectl delete -f test_token_vm_02.yaml
+kubectl delete gatetokens --all -n kube-gateway
 ```
