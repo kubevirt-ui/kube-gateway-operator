@@ -6,13 +6,14 @@
 minikube start --driver=podman --addons=kubevirt,ingress
 
 # wait for minikube to finish installation
+kubectl wait --timeout=180s --for=condition=Available -n kubevirt deployments virt-controller
 kubectl wait --timeout=180s --for=condition=Available -n kubevirt kv/kubevirt
 ```
 
 ## Deploy operator
 
 ```bash
-IMG=quay.io/yaacov/virt-gateway-operator@sha256:00515a35ae3eec22e2b6ab14a1fca3feb8463002085a407c97223363da628ddc make deploy
+IMG=quay.io/yaacov/virt-gateway-operator make deploy
 
 kubectl wait --timeout=180s --for=condition=Available -n kube-gateway deployments/kube-gateway-server
 ```
