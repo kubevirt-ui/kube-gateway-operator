@@ -18,8 +18,7 @@ IMG=quay.io/yaacov/virt-gateway-operator make deploy
 kubectl wait --timeout=180s --for=condition=Available -n kube-gateway deployments/kube-gateway-server
 
 # check service and ingress
-kubectl get pods -n kube-gateway
-kubectl get ingress -n kube-gateway
+kubectl get pods,ingress -n kube-gateway
 
 ```
 
