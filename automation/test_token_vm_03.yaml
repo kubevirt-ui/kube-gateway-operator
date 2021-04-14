@@ -1,0 +1,11 @@
+apiVersion: ocgate.yaacov.com/v1beta1
+kind: GateToken
+metadata:
+  name: token-testvm03
+  namespace: kube-gateway
+spec:
+  durationSec: 180
+  namespace: "kube-gateway-test"
+  resourceNames:
+    - testvm01
+  generateServiceAccount: true
