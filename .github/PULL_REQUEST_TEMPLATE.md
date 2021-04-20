@@ -1,11 +1,15 @@
-## Thank you for submitting a pull request, please check that you have tests and documentation if applies:
-<!--- Put an `x` in all the boxes that apply: -->
-- [ ] The commit message follows our guidelines
-- [ ] Tests for the changes have been added (for bug fixes / features)
-- [ ] Docs have been added / updated (for bug fixes / features)
+**What this PR does / why we need it**:
 
+**Which issue(s) this PR fixes** *(optional, in `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close the issue(s) when PR gets merged)*:
+Fixes #
 
-* **What kind of change does this PR introduce?** (Bug fix, feature, docs update, ...)
+**Special notes for your reviewer**:
 
+**Release note**:
+<!--  Write your release note:
+1. Enter your extended release note in the below block. If the PR requires additional action from users switching to the new release, include the string "action required".
+2. If no release note is required, just write "NONE".
+-->
+```release-note
 
-* **Description**:
+```
