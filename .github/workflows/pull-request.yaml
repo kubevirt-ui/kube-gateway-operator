@@ -10,9 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Use bash
+      run: sudo dpkg-reconfigure dash
 
     - name: Build virt-gateway
-      run: make
+      run: |
+        export KUBEBUILDER_ASSETS=$(pwd)/testbin/bin/
+        make test
+        make
     - name: Setup Minikube
       uses: manusa/actions-setup-minikube@v2.3.1
       with:
