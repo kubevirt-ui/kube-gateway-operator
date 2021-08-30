@@ -34,9 +34,7 @@ export USERNAME=yaacov
 IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 ```
 
-## Create GateToken CR
-
-Requires a secret with private key on 'kube-gateway' namespace:
+## Create GateServer and GateToken examples
 
 Example files:
 [gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
@@ -56,7 +54,7 @@ oc create -f config/samples/kubegateway_v1beta1_gatetoken.yaml
 oc get gatetoken gatetoken-sample -o yaml
 ```
 
-## Local dev build
+## Building for local development
 
 ```bash
 # Compile operator
