@@ -39,10 +39,8 @@ IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 Requires a secret with private key on 'kube-gateway' namespace:
 
 Example files:
-
-[kubegateway_v1beta1_gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml)
-
-[kubegateway_v1beta1_gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
+[gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
+[gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
 
 ```bash
 # Use the kube-gateway namespace
