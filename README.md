@@ -7,6 +7,8 @@
 
 kube-gateway-operator installs and operate [kube-gateway](https://github.com/kubevirt-ui/kube-gateway), kube-gateway allow access k8s API using time limited access tokens, kube-gateway allow usage of one time access tokens to k8s resources.
 
+The operator manges service accounts, permisions, secrets needed for operatin of [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) and JWT token generation for one time k8s API access.
+
 ## Build and push images
 
 ```bash
