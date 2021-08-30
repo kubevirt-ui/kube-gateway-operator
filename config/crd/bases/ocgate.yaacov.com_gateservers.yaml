@@ -60,11 +60,12 @@ spec:
                 maxLength: 1024
                 pattern: ^(http|https)://.*
                 type: string
-              passthrough:
-                default: false
-                description: passthrough the tokens aquired from OAuth2 server directly
-                  to k8s API
-                type: boolean
+              img:
+                default: quay.io/kubevirt-ui/kube-gateway:latest
+                description: img is the kube-gateway image to use. Defalut value is
+                  "quay.io/yaacov/kube-gateway:latest".
+                maxLength: 1024
+                type: string
               route:
                 description: route for the gate proxy server.
                 maxLength: 226

@@ -363,7 +363,7 @@ func (r *GateServerReconciler) serviceaccount(s *ocgatev1beta1.GateServer) (*cor
 		},
 		Secrets: []corev1.ObjectReference{
 			{
-				Name: fmt.Sprintf("%s-jwt-secret", s.Name),
+				Name: fmt.Sprintf("%s-secret", s.Name),
 			},
 		},
 	}
@@ -441,7 +441,7 @@ func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1
 }
 
 func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
-	image := "quay.io/yaacov/oc-gate:latest"
+	image := s.Spec.IMG
 	replicas := int32(1)
 	labels := map[string]string{
 		"app": s.Name,
@@ -468,50 +468,40 @@ func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
 						Image: image,
-						Name:  "oc-gate",
+						Name:  "kube-gateway",
 
 						Ports: []corev1.ContainerPort{{
 							ContainerPort: 8080,
-							Name:          "oc-gate-https",
+							Name:          "https",
 						}},
 						VolumeMounts: []corev1.VolumeMount{
 							{
-								Name:      "oc-gate-secret",
-								MountPath: "/secrets",
-							},
-							{
-								Name:      "oc-gate-jwt-secret",
-								MountPath: "/jwt-secret",
+								Name:      "serving-cert",
+								MountPath: "/var/run/secrets/serving-cert",
 							},
 						},
 						Command: []string{
-							"./oc-gate",
-							fmt.Sprintf("-api-server=%s", s.Spec.APIURL),
-							"-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt",
-							"-cert-file=/secrets/tls.crt",
-							"-key-file=/secrets/tls.key",
-							fmt.Sprintf("-base-address=https://%s", s.Spec.Route),
-							"-listen=https://0.0.0.0:8080",
-							"-jwt-token-key-file=/jwt-secret/cert.pem",
-							"-k8s-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
-							fmt.Sprintf("-k8s-bearer-token-passthrough=%v", s.Spec.PassThrough),
+							"./kube-gateway",
+							"-api-server=https://kubernetes.default.svc",
+							"-gateway-listen=https://0.0.0.0:8080",
+							"-api-server-ca-file=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
+							"-api-server-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
+							"-gateway-key-file=/var/run/secrets/serving-cert/tls.key",
+							"-gateway-cert-file=/var/run/secrets/serving-cert/tls.crt",
+							fmt.Sprintf("-jwt-public-key-name=%s-secret", s.Name),
+							fmt.Sprintf("-jwt-public-key-namespace=%s", s.Namespace),
+							"-jwt-request-enable=true",
+							fmt.Sprintf("-jwt-private-key-name=%s-secret", s.Name),
+							fmt.Sprintf("-jwt-private-key-namespace=%s", s.Namespace),
 						},
 					}},
 
 					Volumes: []corev1.Volume{
 						{
-							Name: "oc-gate-secret",
+							Name: "serving-cert",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: fmt.Sprintf("%s-secret", s.Name),
-								},
-							},
-						},
-						{
-							Name: "oc-gate-jwt-secret",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: "oc-gate-jwt-secret",
 								},
 							},
 						},

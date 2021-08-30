@@ -36,36 +36,47 @@ spec:
           spec:
             description: GateTokenSpec defines the desired state of GateToken
             properties:
-              duration-sec:
-                default: 3600
-                description: duration-sec is the duration in sec the token will be
-                  validated since it's invocation. Defalut value is 3600s (1h).
-                format: int64
-                minimum: 0
-                type: integer
+              duration:
+                default: 1h
+                description: duration is the duration the token will be validated
+                  since it's invocation. Defalut value is "1h".
+                type: string
               from:
                 description: from is time of token invocation, the token will not
                   validate before this time, the token duration will start from this
                   time. Defalut to token object creation time.
                 format: date-time
                 type: string
-              match-method:
-                default: GET,OPTIONS
-                description: match-path is a comma separated list of allowed http
-                  methods, only API requests matching one of the allowed methods will
-                  be validated. Defalut value is "GET,OPTIONS".
-                maxLength: 1024
-                pattern: ^(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+(,(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+)*$
+              secret-name:
+                default: 1h
+                description: secret-name is the name of the secret holding the private
+                  key used to sign the token. Defalut value is "kube-gateway-secret".
                 type: string
-              match-path:
-                description: match-path is a regular expresion used to validate API
-                  request path, API requests matching this pattern will be validated
-                  by the token. This field may not be empty.
-                maxLength: 1024
-                pattern: ^[/^][^:@]+$
+              secret-namespace:
+                default: 1h
+                description: secret-namspace is the namespace of the secret holding
+                  the private key used to sign the token. Defalut value is "kube-gateway".
                 type: string
+              urls:
+                description: urls is a list of urls used to validate API request path,
+                  API requests matching one pattern will be validated by the token.
+                  This field may not be empty.
+                items:
+                  type: string
+                maxItems: 500
+                minItems: 1
+                type: array
+              verbs:
+                description: verbs is a comma separated list of allowed http methods,
+                  only API requests matching one of the allowed methods will be validated.
+                  Defalut value is "[GET,OPTIONS]".
+                items:
+                  type: string
+                maxItems: 500
+                minItems: 1
+                type: array
             required:
-            - match-path
+            - urls
             type: object
           status:
             description: GateTokenStatus defines the observed state of GateToken
@@ -144,34 +155,34 @@ spec:
               data:
                 description: Cached data, once created, user can not change this valuse
                 properties:
-                  alg:
+                  duration:
                     type: string
-                  duration-sec:
-                    format: int64
-                    type: integer
                   exp:
                     format: int64
                     type: integer
                   from:
-                    type: string
-                  matchMethod:
-                    type: string
-                  matchPath:
                     type: string
                   nbf:
                     format: int64
                     type: integer
                   until:
                     type: string
+                  urls:
+                    items:
+                      type: string
+                    type: array
+                  verbs:
+                    items:
+                      type: string
+                    type: array
                 required:
-                - alg
-                - duration-sec
+                - duration
                 - exp
                 - from
-                - matchMethod
-                - matchPath
                 - nbf
                 - until
+                - urls
+                - verbs
                 type: object
               phase:
                 description: Token generation phase (ready|error)

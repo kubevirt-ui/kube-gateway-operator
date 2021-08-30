@@ -96,7 +96,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Get private key secret
-	key, err := getSecret(ctx, r.Client, "oc-gate-jwt-secret", token.Namespace)
+	key, err := getSecret(ctx, r.Client, token.Spec.SecretName, token.Spec.SecretNamespace)
 	if err != nil {
 		r.Log.Info("Can't read private key secret", "err", err)
 
@@ -138,28 +138,39 @@ func (r *GateTokenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 // Cache user data
 func cacheData(token *ocgatev1beta1.GateToken) error {
-	var nbf int64
+	var notBeforeTime int64
+	var duration time.Duration
 
+	// Default from is "now"
 	if token.Spec.From == "" {
-		nbf = int64(time.Now().Unix())
+		notBeforeTime = int64(time.Now().Unix())
 	} else {
-		t, err := time.Parse(time.RFC3339, token.Spec.From)
+		fromTime, err := time.Parse(time.RFC3339, token.Spec.From)
 		if err != nil {
 			return err
 		}
-		nbf = int64(t.Unix())
+		notBeforeTime = int64(fromTime.Unix())
 	}
 
-	token.Status.Data = ocgatev1beta1.GateTokenCache{
-		NBf:         nbf,
-		Exp:         nbf + int64(token.Spec.DurationSec),
-		From:        token.Spec.From,
-		Until:       time.Unix(nbf+int64(token.Spec.DurationSec), 0).UTC().Format(time.RFC3339),
-		DurationSec: token.Spec.DurationSec,
-		MatchMethod: token.Spec.MatchMethod,
-		MatchPath:   token.Spec.MatchPath,
-		Alg:         jwt.SigningMethodRS256.Name,
+	// Default Verbs is ["get"]
+	if token.Spec.Verbs == nil {
+		token.Spec.Verbs = []string{"get"}
 	}
+
+	// Default DurationSec is 3600s (1h)
+	if token.Spec.Duration == "" {
+		token.Spec.Duration = "1h"
+	}
+
+	// Set gate token cache data
+	duration, _ = time.ParseDuration(token.Spec.Duration)
+	token.Status.Data.NBf = notBeforeTime
+	token.Status.Data.Exp = notBeforeTime + int64(duration.Seconds())
+	token.Status.Data.From = time.Unix(notBeforeTime, 0).UTC().Format(time.RFC3339)
+	token.Status.Data.Until = time.Unix(notBeforeTime+int64(duration.Seconds()), 0).UTC().Format(time.RFC3339)
+	token.Status.Data.Duration = token.Spec.Duration
+	token.Status.Data.Verbs = token.Spec.Verbs
+	token.Status.Data.URLs = token.Spec.URLs
 
 	return nil
 }
@@ -209,10 +220,10 @@ func setReadyCondition(token *ocgatev1beta1.GateToken, reason string, message st
 func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
 	// Create token
 	claims := &jwt.MapClaims{
-		"exp":         token.Status.Data.Exp,
-		"nbf":         token.Status.Data.NBf,
-		"matchPath":   token.Status.Data.MatchPath,
-		"matchMethod": token.Status.Data.MatchMethod,
+		"exp":   token.Status.Data.Exp,
+		"nbf":   token.Status.Data.NBf,
+		"URLs":  token.Status.Data.URLs,
+		"verbs": token.Status.Data.Verbs,
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	jwtKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)

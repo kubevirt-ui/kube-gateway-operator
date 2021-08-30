@@ -25,14 +25,13 @@ import (
 
 // GateTokenCache stores initial token data
 type GateTokenCache struct {
-	From        string `json:"from"`
-	Until       string `json:"until"`
-	DurationSec int64  `json:"duration-sec"`
-	NBf         int64  `json:"nbf"`
-	Exp         int64  `json:"exp"`
-	MatchMethod string `json:"matchMethod"`
-	MatchPath   string `json:"matchPath"`
-	Alg         string `json:"alg"`
+	From     string   `json:"from"`
+	Until    string   `json:"until"`
+	Duration string   `json:"duration"`
+	NBf      int64    `json:"nbf"`
+	Exp      int64    `json:"exp"`
+	Verbs    []string `json:"verbs"`
+	URLs     []string `json:"urls"`
 }
 
 // GateTokenSpec defines the desired state of GateToken
@@ -40,15 +39,14 @@ type GateTokenSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// match-path is a regular expresion used to validate API request path,
-	// API requests matching this pattern will be validated by the token.
+	// urls is a list of urls used to validate API request path,
+	// API requests matching one pattern will be validated by the token.
 	// This field may not be empty.
 	// +required
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^[/^][^:@]+$"
-	// +kubebuilder:validation:MaxLength=1024
-	MatchPath string `json:"match-path"`
+	// +kubebuilder:validation:MaxItems=500
+	// +kubebuilder:validation:MinItems=1
+	URLs []string `json:"urls"`
 
 	// from is time of token invocation, the token will not validate before this time,
 	// the token duration will start from this time.
@@ -58,23 +56,34 @@ type GateTokenSpec struct {
 	// +kubebuilder:validation:Format="date-time"
 	From string `json:"from"`
 
-	// duration-sec is the duration in sec the token will be validated since it's invocation.
-	// Defalut value is 3600s (1h).
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="integer"
-	// +kubebuilder:validation:Minimum=0
-	// +kubebuilder:default:=3600
-	DurationSec int64 `json:"duration-sec"`
-
-	// match-path is a comma separated list of allowed http methods,
-	// only API requests matching one of the allowed methods will be validated.
-	// Defalut value is "GET,OPTIONS".
+	// duration is the duration the token will be validated since it's invocation.
+	// Defalut value is "1h".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:validation:Pattern="^(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+(,(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE)+)*$"
-	// +kubebuilder:validation:MaxLength=1024
-	// +kubebuilder:default:="GET,OPTIONS"
-	MatchMethod string `json:"match-method"`
+	// +kubebuilder:default:="1h"
+	Duration string `json:"duration"`
+
+	// verbs is a comma separated list of allowed http methods,
+	// only API requests matching one of the allowed methods will be validated.
+	// Defalut value is "[GET,OPTIONS]".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=500
+	// +kubebuilder:validation:MinItems=1
+	Verbs []string `json:"verbs"`
+
+	// secret-name is the name of the secret holding the private key used to sign the token.
+	// Defalut value is "kube-gateway-secret".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:default:="1h"
+	SecretName string `json:"secret-name"`
+
+	// secret-namspace is the namespace of the secret holding the private key used to sign the token.
+	// Defalut value is "kube-gateway".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:default:="1h"
+	SecretNamespace string `json:"secret-namespace"`
 }
 
 // GateTokenStatus defines the observed state of GateToken

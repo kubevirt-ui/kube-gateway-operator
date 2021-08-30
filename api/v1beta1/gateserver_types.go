@@ -28,6 +28,14 @@ type GateServerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// img is the kube-gateway image to use.
+	// Defalut value is "quay.io/yaacov/kube-gateway:latest".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:validation:MaxLength=1024
+	// +kubebuilder:default:="quay.io/kubevirt-ui/kube-gateway:latest"
+	IMG string `json:"img,omitempty"`
+
 	// api-url is the k8s API url.
 	// Defalut value is "https://kubernetes.default.svc".
 	// +kubebuilder:validation:Optional
@@ -66,13 +74,6 @@ type GateServerSpec struct {
 	// +kubebuilder:validation:MaxLength=1024
 	// +kubebuilder:default:=""
 	AdminResources string `json:"admin-resources,omitempty"`
-
-	// passthrough the tokens aquired from OAuth2 server directly to k8s API
-	// +optional
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type="boolean"
-	// +kubebuilder:default:=false
-	PassThrough bool `json:"passthrough,omitempty"`
 }
 
 // GateServerStatus defines the observed state of GateServer
