@@ -55,9 +55,9 @@ type GateServerReconciler struct {
 // +kubebuilder:rbac:groups="route.openshift.io",resources=routes/custom-host,verbs=create;patch
 // +kubebuilder:rbac:groups="oauth.openshift.io",resources=oauthclients,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="security.openshift.io",resources=securitycontextconstraints,resourceNames=privileged,verbs=use
-// +kubebuilder:rbac:groups="ocgate.rh-fieldwork.com",resources=gateservers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="ocgate.rh-fieldwork.com",resources=gateservers/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups="ocgate.rh-fieldwork.com",resources=gateservers/finalizers,verbs=update
+// +kubebuilder:rbac:groups="kubegateway.kubevirt.io",resources=gateservers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="kubegateway.kubevirt.io",resources=gateservers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="kubegateway.kubevirt.io",resources=gateservers/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

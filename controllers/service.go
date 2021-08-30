@@ -51,6 +51,7 @@ func (r *GateServerReconciler) Service(s *kubegatewayv1beta1.GateServer) (*corev
 					TargetPort: intstr.FromInt(8080),
 				},
 			},
+			Type: corev1.ServiceTypeLoadBalancer,
 		},
 	}
 

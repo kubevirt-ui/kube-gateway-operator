@@ -57,6 +57,32 @@ rules:
 - apiGroups:
   - kubegateway.kubevirt.io
   resources:
+  - gateservers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kubegateway.kubevirt.io
+  resources:
+  - gateservers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - kubegateway.kubevirt.io
+  resources:
+  - gateservers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - kubegateway.kubevirt.io
+  resources:
   - gatetokens
   verbs:
   - create
@@ -102,32 +128,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - ocgate.rh-fieldwork.com
-  resources:
-  - gateservers
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ocgate.rh-fieldwork.com
-  resources:
-  - gateservers/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ocgate.rh-fieldwork.com
-  resources:
-  - gateservers/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
