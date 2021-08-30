@@ -5,7 +5,7 @@ metadata:
   name: gatetoken-viewer-role
 rules:
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gatetokens
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gatetokens/status
   verbs:

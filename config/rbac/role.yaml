@@ -15,7 +15,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gateservers
   verbs:
@@ -27,13 +27,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gateservers/finalizers
   verbs:
   - update
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gateservers/status
   verbs:
@@ -41,7 +41,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gatetokens
   verbs:
@@ -51,13 +51,13 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gatetokens/finalizers
   verbs:
   - update
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gatetokens/status
   verbs:

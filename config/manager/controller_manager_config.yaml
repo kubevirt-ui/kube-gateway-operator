@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: cce4a833.yaacov.com
+  resourceName: cce4a833.kubevirt.io

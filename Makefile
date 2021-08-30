@@ -26,10 +26,10 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # BUNDLE_IMG defines the image:tag used for the bundle. 
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= quay.io/yaacov/oc-gate-operator-bundle:v0.0.1
+BUNDLE_IMG ?= quay.io/yaacov/kube-gateway-operator-bundle:v0.0.1
 
 # Image URL to use all building/pushing image targets
-IMG ?= quay.io/yaacov/oc-gate-operator:v0.0.1
+IMG ?= quay.io/yaacov/kube-gateway-operator:v0.0.1
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 

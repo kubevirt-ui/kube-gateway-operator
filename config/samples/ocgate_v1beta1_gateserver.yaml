@@ -1,7 +1,7 @@
-apiVersion: ocgate.yaacov.com/v1beta1
+apiVersion: kubegateway.kubevirt.io/v1beta1
 kind: GateServer
 metadata:
   name: gateserver-sample
-  namespace: oc-gate
+  namespace: kube-gateway
 spec:
   route: test-proxy.apps.ostest.test.metalkube.org

@@ -24,10 +24,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
-func (r *GateServerReconciler) service(s *ocgatev1beta1.GateServer) (*corev1.Service, error) {
+func (r *GateServerReconciler) Service(s *kubegatewayv1beta1.GateServer) (*corev1.Service, error) {
 	labels := map[string]string{
 		"app": s.Name,
 	}

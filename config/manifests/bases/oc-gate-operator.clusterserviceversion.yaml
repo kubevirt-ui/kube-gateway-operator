@@ -6,8 +6,8 @@ metadata:
     capabilities: Basic Install
     categories: OpenShift Optional
     certified: "false"
-    containerImage: quay.io/yaacov/oc-gate-operator:v0.0.1
-  name: oc-gate-operator.v0.0.0
+    containerImage: quay.io/yaacov/kube-gateway-operator:v0.0.1
+  name: kube-gateway-operator.v0.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -16,12 +16,12 @@ spec:
     - description: GateServer is the Schema for the gateservers API
       displayName: Gate Server
       kind: GateServer
-      name: gateservers.ocgate.yaacov.com
+      name: gateservers.kubegateway.kubevirt.io
       version: v1beta1
     - description: GateToken is the Schema for the gatetokens API
       displayName: Gate Token
       kind: GateToken
-      name: gatetokens.ocgate.yaacov.com
+      name: gatetokens.kubegateway.kubevirt.io
       version: v1beta1
   description: Generate access tokens for oc gate service
   displayName: OC Gate operator
@@ -47,10 +47,10 @@ spec:
   - access
   links:
   - name: Oc Gate Service
-    url: https://github.com/yaacov/oc-gate
+    url: https://github.com/yaacov/kube-gateway
   - name: Oc Gate Operator
-    url: https://github.com/yaacov/oc-gate-operator
+    url: https://github.com/yaacov/kube-gateway-operator
   maturity: alpha
   provider:
-    name: yaacov.com
+    name: kubevirt.io
   version: 0.0.0

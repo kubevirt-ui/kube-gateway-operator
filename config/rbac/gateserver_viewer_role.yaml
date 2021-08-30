@@ -5,7 +5,7 @@ metadata:
   name: gateserver-viewer-role
 rules:
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gateservers
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ocgate.yaacov.com
+  - kubegateway.kubevirt.io
   resources:
   - gateservers/status
   verbs:

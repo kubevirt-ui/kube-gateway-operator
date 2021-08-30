@@ -30,10 +30,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
-const gateserverFinalizer = "ocgate.yaacov.com/finalizer"
+const gateserverFinalizer = "kubegateway.kubevirt.io/finalizer"
 
 // GateServerReconciler reconciles a GateServer object
 type GateServerReconciler struct {
@@ -44,9 +44,9 @@ type GateServerReconciler struct {
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gateservers/finalizers,verbs=update
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gateservers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gateservers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gateservers/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -63,7 +63,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// your logic here
 
 	// Lookup the GateToken instance for this reconcile request
-	gateserver := &ocgatev1beta1.GateServer{}
+	gateserver := &kubegatewayv1beta1.GateServer{}
 	err := r.Get(ctx, req.NamespacedName, gateserver)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -110,8 +110,30 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// Take time
 	t := metav1.Time{Time: time.Now()}
 
+	// Create the JWT secret
+	r.Log.Info("Create JWT secret.")
+	secret, _ := r.Secret(gateserver)
+	if err := r.Client.Create(ctx, secret); err != nil {
+		r.Log.Info("Failed to create service.", "err", err)
+
+		gateserver.Status.Phase = "Error"
+		condition := metav1.Condition{
+			Type:               "SecretCreated",
+			Status:             "False",
+			Reason:             "FailedCreateSecret",
+			Message:            fmt.Sprintf("%s", err),
+			LastTransitionTime: t,
+		}
+		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
+		if err := r.Status().Update(ctx, gateserver); err != nil {
+			r.Log.Info("Failed to update status", "err", err)
+		}
+
+		return ctrl.Result{}, nil
+	}
+
 	// Create the service and route
-	se, _ := r.service(gateserver)
+	se, _ := r.Service(gateserver)
 	err = r.Client.Create(ctx, se)
 	if err != nil {
 		r.Log.Info("Failed to create service.", "err", err)
@@ -132,7 +154,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, nil
 	}
 
-	route, _ := r.route(gateserver)
+	route, _ := r.Route(gateserver)
 	err = r.Client.Create(ctx, route)
 	if err != nil {
 		r.Log.Info("Failed to create route.", "err", err)
@@ -154,7 +176,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// Create the service account and roles
-	sa, _ := r.serviceaccount(gateserver)
+	sa, _ := r.ServiceAccount(gateserver)
 	err = r.Client.Create(ctx, sa)
 	if err != nil {
 		r.Log.Info("Failed to create serviceaccount.", "err", err)
@@ -174,7 +196,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		return ctrl.Result{}, nil
 	}
-	role, _ := r.role(gateserver)
+	role, _ := r.Role(gateserver)
 	err = r.Client.Create(ctx, role)
 	if err != nil {
 		r.Log.Info("Failed to create role.", "err", err)
@@ -194,7 +216,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		return ctrl.Result{}, nil
 	}
-	rolebinding, _ := r.rolebinding(gateserver)
+	rolebinding, _ := r.RoleBinding(gateserver)
 	err = r.Client.Create(ctx, rolebinding)
 	if err != nil {
 		r.Log.Info("Failed to create rolebinding.", "err", err)
@@ -216,7 +238,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	// Create the gate service
-	dep, _ := r.deployment(gateserver)
+	dep, _ := r.Deployment(gateserver)
 	err = r.Client.Create(ctx, dep)
 	if err != nil {
 		r.Log.Info("Failed to create deployment.", "err", err)
@@ -264,7 +286,7 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return ctrl.Result{}, nil
 }
 
-func (r *GateServerReconciler) finalizeGateServer(m *ocgatev1beta1.GateServer) error {
+func (r *GateServerReconciler) finalizeGateServer(m *kubegatewayv1beta1.GateServer) error {
 	// TODO(user): Add the cleanup steps that the operator
 	// needs to do before the CR can be deleted. Examples
 	// of finalizers include performing backups and deleting
@@ -276,6 +298,6 @@ func (r *GateServerReconciler) finalizeGateServer(m *ocgatev1beta1.GateServer) e
 // SetupWithManager sets up the controller with the Manager.
 func (r *GateServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ocgatev1beta1.GateServer{}).
+		For(&kubegatewayv1beta1.GateServer{}).
 		Complete(r)
 }

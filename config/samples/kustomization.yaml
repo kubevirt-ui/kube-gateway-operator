@@ -1,5 +1,5 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
-- ocgate_v1beta1_gatetoken.yaml
-- ocgate_v1beta1_gateserver.yaml
+- kubegateway_v1beta1_gatetoken.yaml
+- kubegateway_v1beta1_gateserver.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

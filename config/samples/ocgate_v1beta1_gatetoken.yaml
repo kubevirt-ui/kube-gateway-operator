@@ -1,8 +1,8 @@
-apiVersion: ocgate.yaacov.com/v1beta1
+apiVersion: kubegateway.kubevirt.io/v1beta1
 kind: GateToken
 metadata:
   name: gatetoken-sample
-  namespace: oc-gate
+  namespace: kube-gateway
 spec:
   match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
 

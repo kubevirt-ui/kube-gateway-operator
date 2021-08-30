@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -61,10 +61,10 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
-	err = ocgatev1beta1.AddToScheme(scheme.Scheme)
+	err = kubegatewayv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = ocgatev1beta1.AddToScheme(scheme.Scheme)
+	err = kubegatewayv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

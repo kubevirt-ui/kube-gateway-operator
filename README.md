@@ -1,10 +1,10 @@
-# oc-gate-operator
+# kube-gateway-operator
 
-![alt gopher network](https://raw.githubusercontent.com/yaacov/oc-gate/main/web/public/network-side.png)
+![alt gopher network](https://raw.githubusercontent.com/yaacov/kube-gateway/main/web/public/network-side.png)
 
-creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
+creates tokens for the [kube-gateway](https://github.com/yaacov/kube-gateway) service
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/oc-gate-operator)](https://goreportcard.com/report/github.com/yaacov/oc-gate-operator)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/kube-gateway-operator)](https://goreportcard.com/report/github.com/yaacov/kube-gateway-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Install
@@ -12,25 +12,25 @@ creates tokens for the [oc-gate](https://github.com/yaacov/oc-gate) service
 Install using [operator-sdk](https://sdk.operatorframework.io/docs/installation/)
 
 ```bash
-# Use oc-gate namespace
-oc project oc-gate
+# Use kube-gateway namespace
+oc project kube-gateway
 
 # Add privileged security context to the user running the operator
-oc adm policy add-scc-to-user privileged -z default -n oc-gate
+oc adm policy add-scc-to-user privileged -z default -n kube-gateway
 
 # Add the private key secret used to generate tokens
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
+oc create -n kube-gateway-operator-system secret generic kube-gateway-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 
 # Install the operator
-operator-sdk run bundle quay.io/yaacov/oc-gate-operator-bundle:v0.0.1 -n oc-gate
+operator-sdk run bundle quay.io/yaacov/kube-gateway-operator-bundle:v0.0.1 -n kube-gateway
 
 # Un-Install
-operator-sdk cleanup oc-gate-operator
+operator-sdk cleanup kube-gateway-operator
 ```
 
 ## Usage
 
-Requesting a token for [oc-gate](https://github.com/yaacov/oc-gate) service is done using GateToken CRD,
+Requesting a token for [kube-gateway](https://github.com/yaacov/kube-gateway) service is done using GateToken CRD,
 
 Available fields are:
 
@@ -40,7 +40,7 @@ Available fields are:
 - duration-sec: int, duration-sec is the duration in sec the token will be validated since it's invocation. Defalut value is 3600s (1h).
 - from: string, from is time of token invocation, the token will not validate before this time, the token duration will start from this time. Defalut to token object creation time.
 
-Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: oc-gate-jwt-secret), nce token is ready it will be available in the GateToken status.
+Creating a token requires a secret holding a RSA private-key for sighing the token in the namespace of the token (secret name: kube-gateway-jwt-secret), nce token is ready it will be available in the GateToken status.
 
 Get a token:
 
@@ -62,28 +62,28 @@ Requires
 ```bash
 # Deploy the operator, RBAC roles and CRDs
 export USERNAME=yaacov
-make deploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
+make deploy IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1
 ```
 
 ```bash
 # Remove deployment of the operator, RBAC roles and CRDs
 export USERNAME=yaacov
-make undeploy IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
+make undeploy IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1
 ```
 
 ## Create GateToken CR
 
-Requires a secret with private key on 'oc-gate' namespace:
+Requires a secret with private key on 'kube-gateway' namespace:
 
 ```bash
-# Use the oc-gate namespace
-oc project oc-gate
+# Use the kube-gateway namespace
+oc project kube-gateway
 
 # create a secret
-oc create -n oc-gate-operator-system secret generic oc-gate-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
+oc create -n kube-gateway-operator-system secret generic kube-gateway-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 
 # create a token request
-oc create -f config/samples/ocgate_v1beta1_gatetoken.yaml
+oc create -f config/samples/kubegateway_v1beta1_gatetoken.yaml
 
 # check the token
 oc get gatetoken gatetoken-sample -o yaml
@@ -107,5 +107,5 @@ make run
 
 ```bash
 export USERNAME=yaacov
-make podman-build podman-push IMG=quay.io/$USERNAME/oc-gate-operator:v0.0.1
+make podman-build podman-push IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1
 ```

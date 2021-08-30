@@ -33,8 +33,8 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
-	"github.com/yaacov/oc-gate-operator/controllers"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
+	"github.com/yaacov/kube-gateway-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -47,7 +47,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(routev1.AddToScheme(scheme))
-	utilruntime.Must(ocgatev1beta1.AddToScheme(scheme))
+	utilruntime.Must(kubegatewayv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -74,7 +74,7 @@ func main() {
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "cce4a833.yaacov.com",
+		LeaderElectionID:       "cce4a833.kubevirt.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")

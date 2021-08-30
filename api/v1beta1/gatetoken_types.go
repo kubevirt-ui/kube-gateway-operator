@@ -72,18 +72,24 @@ type GateTokenSpec struct {
 	Verbs []string `json:"verbs"`
 
 	// secret-name is the name of the secret holding the private key used to sign the token.
-	// Defalut value is "kube-gateway-secret".
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:default:="1h"
+	// +kubebuilder:default:=""
 	SecretName string `json:"secret-name"`
 
 	// secret-namspace is the namespace of the secret holding the private key used to sign the token.
-	// Defalut value is "kube-gateway".
+	// Defalut value is "".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
-	// +kubebuilder:default:="1h"
+	// +kubebuilder:default:=""
 	SecretNamespace string `json:"secret-namespace"`
+
+	// secret-file is the file entry in the secret holding the private key used to sign the token.
+	// Defalut value is "tls.key".
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type="string"
+	// +kubebuilder:default:="tls.key"
+	SecretFile string `json:"secret-file"`
 }
 
 // GateTokenStatus defines the observed state of GateToken

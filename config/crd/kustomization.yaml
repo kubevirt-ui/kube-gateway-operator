@@ -2,8 +2,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/ocgate.yaacov.com_gatetokens.yaml
-- bases/ocgate.yaacov.com_gateservers.yaml
+- bases/kubegateway.kubevirt.io_gatetokens.yaml
+- bases/kubegateway.kubevirt.io_gateservers.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

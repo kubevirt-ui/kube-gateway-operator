@@ -1,14 +1,14 @@
-domain: yaacov.com
+domain: kubevirt.io
 layout: go.kubebuilder.io/v3
-projectName: oc-gate-operator
-repo: github.com/yaacov/oc-gate-operator
+projectName: kube-gateway-operator
+repo: github.com/yaacov/kube-gateway-operator
 resources:
 - crdVersion: v1
-  group: ocgate
+  group: kubegateway
   kind: GateToken
   version: v1beta1
 - crdVersion: v1
-  group: ocgate
+  group: kubegateway
   kind: GateServer
   version: v1beta1
 version: 3-alpha

@@ -5,10 +5,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
-func (r *GateServerReconciler) rolebinding(s *ocgatev1beta1.GateServer) (*rbacv1.RoleBinding, error) {
+func (r *GateServerReconciler) RoleBinding(s *kubegatewayv1beta1.GateServer) (*rbacv1.RoleBinding, error) {
 	labels := map[string]string{
 		"app": s.Name,
 	}

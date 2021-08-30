@@ -7,10 +7,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
-func (r *GateServerReconciler) role(s *ocgatev1beta1.GateServer) (*rbacv1.Role, error) {
+func (r *GateServerReconciler) Role(s *kubegatewayv1beta1.GateServer) (*rbacv1.Role, error) {
 	var verbs []string
 	var resources []string
 

@@ -32,7 +32,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
 // GateTokenReconciler reconciles a GateToken object
@@ -44,9 +44,9 @@ type GateTokenReconciler struct {
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=security.openshift.io,resources=securitycontextconstraints,resourceNames=privileged,verbs=use
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens,verbs=get;list;watch;create;delete
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=ocgate.yaacov.com,resources=gatetokens/finalizers,verbs=update
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gatetokens,verbs=get;list;watch;create;delete
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gatetokens/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=kubegateway.kubevirt.io,resources=gatetokens/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -63,7 +63,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// your logic here
 
 	// Lookup the GateToken instance for this reconcile request
-	token := &ocgatev1beta1.GateToken{}
+	token := &kubegatewayv1beta1.GateToken{}
 	if err := r.Get(ctx, req.NamespacedName, token); err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -96,7 +96,7 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Get private key secret
-	key, err := getSecret(ctx, r.Client, token.Spec.SecretName, token.Spec.SecretNamespace)
+	key, err := getSecret(ctx, r.Client, token.Spec.SecretName, token.Spec.SecretNamespace, token.Spec.SecretFile)
 	if err != nil {
 		r.Log.Info("Can't read private key secret", "err", err)
 
@@ -132,12 +132,12 @@ func (r *GateTokenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 // SetupWithManager sets up the controller with the Manager.
 func (r *GateTokenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ocgatev1beta1.GateToken{}).
+		For(&kubegatewayv1beta1.GateToken{}).
 		Complete(r)
 }
 
 // Cache user data
-func cacheData(token *ocgatev1beta1.GateToken) error {
+func cacheData(token *kubegatewayv1beta1.GateToken) error {
 	var notBeforeTime int64
 	var duration time.Duration
 
@@ -162,6 +162,10 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 		token.Spec.Duration = "1h"
 	}
 
+	if token.Spec.SecretNamespace == "" {
+		token.Spec.SecretNamespace = token.Namespace
+	}
+
 	// Set gate token cache data
 	duration, _ = time.ParseDuration(token.Spec.Duration)
 	token.Status.Data.NBf = notBeforeTime
@@ -175,7 +179,7 @@ func cacheData(token *ocgatev1beta1.GateToken) error {
 	return nil
 }
 
-func getSecret(ctx context.Context, client client.Client, name string, namespace string) ([]byte, error) {
+func getSecret(ctx context.Context, client client.Client, name string, namespace string, file string) ([]byte, error) {
 	// Get private key secret
 	secret := &corev1.Secret{}
 	namespaced := &types.NamespacedName{
@@ -187,11 +191,11 @@ func getSecret(ctx context.Context, client client.Client, name string, namespace
 		return nil, err
 	}
 
-	key := secret.Data["key.pem"]
+	key := secret.Data[file]
 	return key, nil
 }
 
-func setErrorCondition(token *ocgatev1beta1.GateToken, reason string, err error) {
+func setErrorCondition(token *kubegatewayv1beta1.GateToken, reason string, err error) {
 	t := metav1.Time{Time: time.Now()}
 	token.Status.Phase = "Error"
 	condition := metav1.Condition{
@@ -204,7 +208,7 @@ func setErrorCondition(token *ocgatev1beta1.GateToken, reason string, err error)
 	token.Status.Conditions = []metav1.Condition{condition}
 }
 
-func setReadyCondition(token *ocgatev1beta1.GateToken, reason string, message string) {
+func setReadyCondition(token *kubegatewayv1beta1.GateToken, reason string, message string) {
 	t := metav1.Time{Time: time.Now()}
 	token.Status.Phase = "Ready"
 	condition := metav1.Condition{
@@ -217,7 +221,7 @@ func setReadyCondition(token *ocgatev1beta1.GateToken, reason string, message st
 	token.Status.Conditions = []metav1.Condition{condition}
 }
 
-func singToken(token *ocgatev1beta1.GateToken, key []byte) error {
+func singToken(token *kubegatewayv1beta1.GateToken, key []byte) error {
 	// Create token
 	claims := &jwt.MapClaims{
 		"exp":   token.Status.Data.Exp,

@@ -8,10 +8,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	ocgatev1beta1 "github.com/yaacov/oc-gate-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
 )
 
-func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.Deployment, error) {
+func (r *GateServerReconciler) Deployment(s *kubegatewayv1beta1.GateServer) (*appsv1.Deployment, error) {
 	image := s.Spec.IMG
 	replicas := int32(1)
 	labels := map[string]string{
@@ -59,10 +59,10 @@ func (r *GateServerReconciler) deployment(s *ocgatev1beta1.GateServer) (*appsv1.
 							"-api-server-bearer-token-file=/var/run/secrets/kubernetes.io/serviceaccount/token",
 							"-gateway-key-file=/var/run/secrets/serving-cert/tls.key",
 							"-gateway-cert-file=/var/run/secrets/serving-cert/tls.crt",
-							fmt.Sprintf("-jwt-public-key-name=%s-secret", s.Name),
+							fmt.Sprintf("-jwt-public-key-name=%s-jwt-secret", s.Name),
 							fmt.Sprintf("-jwt-public-key-namespace=%s", s.Namespace),
 							"-jwt-request-enable=true",
-							fmt.Sprintf("-jwt-private-key-name=%s-secret", s.Name),
+							fmt.Sprintf("-jwt-private-key-name=%s-jwt-secret", s.Name),
 							fmt.Sprintf("-jwt-private-key-namespace=%s", s.Namespace),
 						},
 					}},

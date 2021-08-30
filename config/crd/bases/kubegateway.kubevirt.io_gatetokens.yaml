@@ -47,15 +47,20 @@ spec:
                   time. Defalut to token object creation time.
                 format: date-time
                 type: string
+              secret-file:
+                default: tls.key
+                description: secret-file is the file entry in the secret holding the
+                  private key used to sign the token. Defalut value is "tls.key".
+                type: string
               secret-name:
-                default: 1h
+                default: ""
                 description: secret-name is the name of the secret holding the private
-                  key used to sign the token. Defalut value is "kube-gateway-secret".
+                  key used to sign the token.
                 type: string
               secret-namespace:
-                default: 1h
+                default: ""
                 description: secret-namspace is the namespace of the secret holding
-                  the private key used to sign the token. Defalut value is "kube-gateway".
+                  the private key used to sign the token. Defalut value is "".
                 type: string
               urls:
                 description: urls is a list of urls used to validate API request path,
@@ -76,6 +81,7 @@ spec:
                 minItems: 1
                 type: array
             required:
+            - secret-name
             - urls
             type: object
           status:
