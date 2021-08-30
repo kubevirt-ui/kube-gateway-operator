@@ -33,8 +33,8 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
-	"github.com/yaacov/kube-gateway-operator/controllers"
+	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
+	"github.com/kubevirt-ui/kube-gateway-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 

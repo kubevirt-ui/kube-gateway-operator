@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 

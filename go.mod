@@ -1,4 +1,4 @@
-module github.com/yaacov/kube-gateway-operator
+module github.com/kubevirt-ui/kube-gateway-operator
 
 go 1.15
 

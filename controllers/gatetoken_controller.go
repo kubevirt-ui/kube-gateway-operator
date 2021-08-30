@@ -32,7 +32,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
 // GateTokenReconciler reconciles a GateToken object

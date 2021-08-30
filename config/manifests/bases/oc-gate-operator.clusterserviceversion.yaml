@@ -6,7 +6,7 @@ metadata:
     capabilities: Basic Install
     categories: OpenShift Optional
     certified: "false"
-    containerImage: quay.io/yaacov/kube-gateway-operator:v0.0.1
+    containerImage: quay.io/kubevirt-ui/kube-gateway-operator:v0.0.1
   name: kube-gateway-operator.v0.0.0
   namespace: placeholder
 spec:
@@ -47,9 +47,9 @@ spec:
   - access
   links:
   - name: Oc Gate Service
-    url: https://github.com/yaacov/kube-gateway
+    url: https://github.com/kubevirt-ui/kube-gateway
   - name: Oc Gate Operator
-    url: https://github.com/yaacov/kube-gateway-operator
+    url: https://github.com/kubevirt-ui/kube-gateway-operator
   maturity: alpha
   provider:
     name: kubevirt.io

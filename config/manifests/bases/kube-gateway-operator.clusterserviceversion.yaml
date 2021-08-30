@@ -1,0 +1,53 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: kube-gateway-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: GateServer is the Schema for the gateservers API
+      displayName: Gate Server
+      kind: GateServer
+      name: gateservers.kubegateway.kubevirt.io
+      version: v1beta1
+    - description: GateToken is the Schema for the gatetokens API
+      displayName: Gate Token
+      kind: GateToken
+      name: gatetokens.kubegateway.kubevirt.io
+      version: v1beta1
+  description: A kubevirt gateway
+  displayName: Kube Gateway
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - kubevirt
+  - gateway
+  links:
+  - name: Kube Gateway Operator
+    url: https://kube-gateway-operator.domain
+  maintainers:
+  - email: yzamir@redhat.com
+    name: yzamir
+  maturity: alpha
+  provider:
+    name: kubevirt.io
+  version: 0.0.0

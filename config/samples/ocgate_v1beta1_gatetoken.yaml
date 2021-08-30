@@ -4,5 +4,7 @@ metadata:
   name: gatetoken-sample
   namespace: kube-gateway
 spec:
-  match-path: ^/k8s/apis/subresources.kubevirt.io/v1alpha3/namespaces/default/virtualmachineinstances/my-vm/vnc
+  secret-name: gateserver-sample-jwt-secret
+  urls:
+  - /api/v1/*
 

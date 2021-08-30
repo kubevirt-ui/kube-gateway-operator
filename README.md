@@ -1,10 +1,10 @@
 # kube-gateway-operator
 
-![alt gopher network](https://raw.githubusercontent.com/yaacov/kube-gateway/main/web/public/network-side.png)
+![alt gopher network](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/web/public/network-side.png)
 
-creates tokens for the [kube-gateway](https://github.com/yaacov/kube-gateway) service
+creates tokens for the [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) service
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/kube-gateway-operator)](https://goreportcard.com/report/github.com/yaacov/kube-gateway-operator)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubevirt-ui/kube-gateway-operator)](https://goreportcard.com/report/github.com/kubevirt-ui/kube-gateway-operator)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Install
@@ -22,7 +22,7 @@ oc adm policy add-scc-to-user privileged -z default -n kube-gateway
 oc create -n kube-gateway-operator-system secret generic kube-gateway-jwt-secret --from-file=test/cert.pem --from-file=test/key.pem
 
 # Install the operator
-operator-sdk run bundle quay.io/yaacov/kube-gateway-operator-bundle:v0.0.1 -n kube-gateway
+operator-sdk run bundle quay.io/kubevirt-ui/kube-gateway-operator-bundle:v0.0.1 -n kube-gateway
 
 # Un-Install
 operator-sdk cleanup kube-gateway-operator
@@ -30,7 +30,7 @@ operator-sdk cleanup kube-gateway-operator
 
 ## Usage
 
-Requesting a token for [kube-gateway](https://github.com/yaacov/kube-gateway) service is done using GateToken CRD,
+Requesting a token for [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) service is done using GateToken CRD,
 
 Available fields are:
 

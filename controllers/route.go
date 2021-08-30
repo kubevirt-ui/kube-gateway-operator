@@ -6,7 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	kubegatewayv1beta1 "github.com/yaacov/kube-gateway-operator/api/v1beta1"
+	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
 func (r *GateServerReconciler) Route(s *kubegatewayv1beta1.GateServer) (*routev1.Route, error) {

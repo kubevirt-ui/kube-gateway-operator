@@ -29,7 +29,7 @@ type GateServerSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// img is the kube-gateway image to use.
-	// Defalut value is "quay.io/yaacov/kube-gateway:latest".
+	// Defalut value is "quay.io/kubevirt-ui/kube-gateway:latest".
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type="string"
 	// +kubebuilder:validation:MaxLength=1024

@@ -63,7 +63,7 @@ spec:
               img:
                 default: quay.io/kubevirt-ui/kube-gateway:latest
                 description: img is the kube-gateway image to use. Defalut value is
-                  "quay.io/yaacov/kube-gateway:latest".
+                  "quay.io/kubevirt-ui/kube-gateway:latest".
                 maxLength: 1024
                 type: string
               route:

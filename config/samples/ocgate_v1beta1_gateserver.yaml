@@ -3,5 +3,4 @@ kind: GateServer
 metadata:
   name: gateserver-sample
   namespace: kube-gateway
-spec:
-  route: test-proxy.apps.ostest.test.metalkube.org
+spec: {}
