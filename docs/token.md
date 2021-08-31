@@ -52,7 +52,9 @@ vm=testvm
 ns=gateway-example
 
 # Get the admin user k8s bearer token, and the k8s API path,
-# We will use the k8s API and credentials to create the gatetoken resource:
+# We will use the k8s API and credentials to create the gatetoken resource
+# NOTE: users should know the admin token and k8s api host, the scripts here 
+#       gets this value using oc command only for this example.
 token=$(oc whoami -t)
 apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespaces/$ns/gatetokens
 
@@ -60,6 +62,8 @@ apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespac
 date=$(date "+%y%m%d%H%M")
 name=$vm-$date
 # Get the name of the secret holding the private key for signing the gatetoken
+# NOTE: users should know the secret name, the script here
+#       gets this value using oc command only for this example.
 secret_name=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
 
 # Generate the vnc subresource path
