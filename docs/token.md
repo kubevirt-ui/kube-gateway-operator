@@ -48,24 +48,27 @@ The folowing example describe how to create a token resource using a curl commen
 ```bash
 # Set the vm name
 vm=testvm
-# Set the vm namespace (must be same as proxy)
+# Set the vm namespace (the virtual machine must be in the same namespace as the proxy)
 ns=gateway-example
 
-# Get a bearer token of a k8s user who can create and read gatetoken resources in the example namespace:
+# Get the admin user k8s bearer token, and the k8s API path,
+# We will use the k8s API and credentials to create the gatetoken resource:
 token=$(oc whoami -t)
 apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespaces/$ns/gatetokens
 
-# Generate the path for the demo:
+# Generate a uniqe gatetoken name
 date=$(date "+%y%m%d%H%M")
 name=$vm-$date
-# Get the secret, 
+# Get the secret name holding the private key for signing the gatetoken
 secret=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
-# Generate the vnc subresource
+
+# Generate the vnc subresource path
 path=/apis/subresources.kubevirt.io/v1/namespaces/$ns/virtualmachineinstances/$vm/vnc
 
-# Create the gatetoken resource:
+# Create the gatetoken resource
 data="{\"apiVersion\":\"kubegateway.kubevirt.io/v1beta1\",\"kind\":\"GateToken\",\"metadata\":{\"name\":\"$name\",\"namespace\":\"$ns\"},\"spec\":{\"secret-name\":\"$secret\",\"urls\":[\"$path\"]}}"
 
+# Call k8s API using admin credentials to create a new gatetoken
 curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" -H "Content-Type: application/json" --request POST --data $data $apipath
 ```
 
@@ -74,21 +77,24 @@ curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" -H "Cont
 Once a token resource is registered it will try to sign the token, get the sign token:
 
 ```bash
-curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath/$name | jq .status.token
+# Get the token resource
+curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath/$name
 ```
 
 ## Use the token to access the resource
 
 ```bash
-path=/apis/subresources.kubevirt.io/v1/namespaces/$ns/virtualmachineinstances/$vm/vnc
+# Get the JWT from the gatetoken resource using admin credentials
 jwt=$(curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath/$name | jq .status.token)
 
 # The proxy URL is set in the gateserver spec
 proxyurl=https://$(oc get gateserver -o json | jq -r .items[0].spec.route)
 
-# Open the link in a browser.
 # The link is signed using ${jwt} and will access the k8s API at ${path}.
 signed_link="${proxyurl}/auth/jwt/set?token=${jwt}&then=/noVNC/vnc_lite.html?path=k8s${path}"
 
+# Users holding the signed link will be able to use it for 1h:
+
+# Open the link in a browser
 google-chrome "${signed_link}"
 ```
