@@ -59,7 +59,7 @@ apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespac
 # Generate a uniqe gatetoken name
 date=$(date "+%y%m%d%H%M")
 name=$vm-$date
-# Get the secret name holding the private key for signing the gatetoken
+# Get the name of the secret holding the private key for signing the gatetoken
 secret=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
 
 # Generate the vnc subresource path
