@@ -70,6 +70,19 @@ data="{\"apiVersion\":\"kubegateway.kubevirt.io/v1beta1\",\"kind\":\"GateToken\"
 
 # Call k8s API using admin credentials to create a new gatetoken
 curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" -H "Content-Type: application/json" --request POST --data $data $apipath
+
+# Another way to create the gatetoken is using the oc command
+# cat <<EOF | oc create -f -
+# apiVersion: kubegateway.kubevirt.io/v1beta1
+# kind: GateToken\
+# metadata:
+#   name: $name
+#   namespace: $ns
+# spec:
+#   secret-name: $secret
+#   urls:
+#   - $path
+# EOF
 ```
 
 ## Get the JWT singed token from the token resource
@@ -86,6 +99,9 @@ curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath
 ```bash
 # Get the JWT from the gatetoken resource using admin credentials
 jwt=$(curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath/$name | jq .status.token)
+
+# Another way to get the gatetoken is using the oc command
+# oc get gatetoken $name -o json | jq .status.token
 
 # The proxy URL is set in the gateserver spec
 proxyurl=https://$(oc get gateserver -o json | jq -r .items[0].spec.route)
