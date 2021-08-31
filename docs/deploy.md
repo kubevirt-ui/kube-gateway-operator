@@ -80,7 +80,13 @@ EOF
 
 The gateway manager pod should start running in the namespace.
 
+### Note: the secret holding the private key for signing the token
 
+When creating signed tokens for this gateway proxy, a user must know the secret name:
+
+```bash
+oc get secrets -n gateway-example | grep jwt-secret
+```
 
 
 
