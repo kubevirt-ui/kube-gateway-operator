@@ -12,19 +12,24 @@ oc create -f https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator
 
 ## Deploy using customized / local images 
 
-The example deployment use 3 container images that need customization
+The gateway operator deployment use 3 container images that need customization
+A user may use the default images or customized ones.
 
-gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0 - rbac proxy used by the operator manager
-quay.io/kubevirt-ui/kube-gateway:latest - the kube gateway proxy server
-quay.io/kubevirt-ui/kube-gateway-operator:v0.0.1 - the kube gateway operator image
+| Image | Description
+|---|---
+| gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0 | rbac proxy used by the operator manager
+| quay.io/kubevirt-ui/kube-gateway:latest | the kube gateway proxy server
+| quay.io/kubevirt-ui/kube-gateway-operator:v0.0.1 | the kube gateway operator image
 
-To cusomize the deployment replace this images in the example file
+To cusomize the deployment replace this images in the example file:
 
 ```bash
 curl https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/deploy/kube-gateway-operator.yaml > operator.yaml
 
 # Check the current images for rbac-proxy, kube-gateway and kube-gateway-operator
-# and replacy them with you customize / local images:
+# and replacy them with you customize / local images.
+
+# Here is an example script for replacing the images:
 RBAC_IMAG=gcr.io/kubebuilder/kube-rbac-proxy:v0.5.0
 GATEWAY_IMAG=quay.io/kubevirt-ui/kube-gateway:latest
 GATEWAY_OPERATOR_IMAG=quay.io/kubevirt-ui/kube-gateway-operator:v0.0.1
@@ -40,15 +45,16 @@ sed -i "s|${GATEWAY_OPERATOR_IMAG}|${GATEWAY_OPERATOR_IMAG_CI}|g;" operator.yaml
 ```
 
 ```bash
-# Deploy the customized operator
+# Once the operator.yaml file is ready, deploy the customized operator
 oc create -f operator.yaml
 ```
 
 ## Starting a gateway
 
-Once operator it installed, we can start running a gateway.
-
+Now that the operator it installed, we can start running a kube gateway server.
 Create the proxy in the namespace that contain the k8s resources you with to expose.
+
+For this example, we will create a namespace called "gateway-example" and spin up a gateway server:
 
 ```bash
 oc new-project gateway-example
