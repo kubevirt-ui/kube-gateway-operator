@@ -23,7 +23,6 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	"golang.org/x/crypto/ssh"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -122,16 +121,4 @@ func encodePublicKeyToPEM(pubkey *rsa.PublicKey) ([]byte, error) {
 	pubPEM := pem.EncodeToMemory(&pubBlock)
 
 	return pubPEM, nil
-}
-
-// generatePublicKey take a rsa.PublicKey and return bytes suitable for writing to .pub file
-// returns in the format "ssh-rsa ..."
-func generatePublicKey(privatekey *rsa.PublicKey) ([]byte, error) {
-	publicRsaKey, err := ssh.NewPublicKey(privatekey)
-	if err != nil {
-		return nil, err
-	}
-	pubKeyBytes := ssh.MarshalAuthorizedKey(publicRsaKey)
-
-	return pubKeyBytes, nil
 }
