@@ -31,7 +31,8 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
-// Secret is a
+// Secret creates a secret resource for holding the private and public keys used for
+// JWT signing and authentication
 func (r *GateServerReconciler) Secret(s *kubegatewayv1beta1.GateServer) (*corev1.Secret, error) {
 	labels := map[string]string{
 		"app": s.Name,

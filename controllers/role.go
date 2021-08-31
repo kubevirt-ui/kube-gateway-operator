@@ -10,6 +10,7 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// Role creates a role resource
 func (r *GateServerReconciler) Role(s *kubegatewayv1beta1.GateServer) (*rbacv1.Role, error) {
 	var verbs []string
 	var resources []string

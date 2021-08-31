@@ -11,6 +11,7 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// Deployment creates a deployment resource
 func (r *GateServerReconciler) Deployment(s *kubegatewayv1beta1.GateServer) (*appsv1.Deployment, error) {
 	image := s.Spec.IMG
 	replicas := int32(1)

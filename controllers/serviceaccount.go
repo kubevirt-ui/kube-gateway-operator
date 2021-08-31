@@ -10,6 +10,9 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// ServiceAccount creates a service account resource
+// the secret part will create a secret holding a token and cridentials to log
+// into the API server using this service account
 func (r *GateServerReconciler) ServiceAccount(s *kubegatewayv1beta1.GateServer) (*corev1.ServiceAccount, error) {
 	labels := map[string]string{
 		"app": s.Name,

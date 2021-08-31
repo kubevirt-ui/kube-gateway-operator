@@ -27,6 +27,8 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// Service creates a service resource
+// This service shoult be load balanced using a node port open to outside the cluster
 func (r *GateServerReconciler) Service(s *kubegatewayv1beta1.GateServer) (*corev1.Service, error) {
 	labels := map[string]string{
 		"app": s.Name,

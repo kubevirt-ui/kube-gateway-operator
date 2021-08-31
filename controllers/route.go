@@ -9,6 +9,7 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// Route creates a route binding resource (openshift only)
 func (r *GateServerReconciler) Route(s *kubegatewayv1beta1.GateServer) (*routev1.Route, error) {
 	labels := map[string]string{
 		"app": s.Name,

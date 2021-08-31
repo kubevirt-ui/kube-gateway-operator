@@ -11,6 +11,13 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// CreateResources creates resources needed to run the gateway proxy
+// - secrets
+// - service
+// - service account
+// - role
+// - rolebinding
+// - route (FIXME: requirs openshift)
 func (r *GateServerReconciler) CreateResources(ctx context.Context, gateserver *kubegatewayv1beta1.GateServer) (ctrl.Result, error) {
 	var err error
 
