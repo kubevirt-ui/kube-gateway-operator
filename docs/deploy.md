@@ -12,7 +12,7 @@ oc create -f https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator
 
 ## Deploy using customized / local images 
 
-The gateway operator deployment use 3 container images that need customization
+The gateway operator deployment use 3 container images that need customization.
 A user may use the default images or customized ones.
 
 | Image | Description
