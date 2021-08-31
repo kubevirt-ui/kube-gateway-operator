@@ -8,6 +8,7 @@ import (
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
 
+// RoleBinding creates a role binding resource
 func (r *GateServerReconciler) RoleBinding(s *kubegatewayv1beta1.GateServer) (*rbacv1.RoleBinding, error) {
 	labels := map[string]string{
 		"app": s.Name,
