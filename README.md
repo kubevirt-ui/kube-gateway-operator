@@ -19,7 +19,7 @@ IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make podman-push
 
 ## Deploy
 
-For more information about deployment options see the [detached deployment](/docs/deploy.md) doc.
+For more information about deployment options see the [deploy](/docs/deploy.md) doc.
 
 ```bash
 # Deploy the operator, RBAC roles and CRDs
