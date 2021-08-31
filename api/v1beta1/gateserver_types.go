@@ -66,7 +66,7 @@ type GateServerSpec struct {
 	// +kubebuilder:default:="reader"
 	AdminRole string `json:"admin-role,omitempty"`
 
-	// admin-resources is a comma seperated list of resources athorization role of the service
+	// admin-resources is a comma separated list of resources athorization role of the service
 	// if left empty service could access any resource.
 	// Defalut value is "".
 	// +kubebuilder:validation:Optional

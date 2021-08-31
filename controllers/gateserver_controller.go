@@ -23,12 +23,11 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	kubegatewayv1beta1 "github.com/kubevirt-ui/kube-gateway-operator/api/v1beta1"
 )
@@ -144,26 +143,9 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, nil
 	}
 
-	// Create the service and route
-	se, _ := r.Service(gateserver)
-	err = r.Client.Create(ctx, se)
+	ctr, err := r.CreateResources(ctx, gateserver)
 	if err != nil {
-		r.Log.Info("Failed to create service.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "ServiceCreated",
-			Status:             "False",
-			Reason:             "FailedCreateService",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
+		return ctr, nil
 	}
 
 	route, _ := r.Route(gateserver)
@@ -176,68 +158,6 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			Type:               "RouteCreated",
 			Status:             "False",
 			Reason:             "FailedCreateRoute",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
-	}
-
-	// Create the service account and roles
-	sa, _ := r.ServiceAccount(gateserver)
-	err = r.Client.Create(ctx, sa)
-	if err != nil {
-		r.Log.Info("Failed to create serviceaccount.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "ServiceaccountCreated",
-			Status:             "False",
-			Reason:             "FailedCreateServiceaccount",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
-	}
-	role, _ := r.Role(gateserver)
-	err = r.Client.Create(ctx, role)
-	if err != nil {
-		r.Log.Info("Failed to create role.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RoleCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRole",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
-	}
-	rolebinding, _ := r.RoleBinding(gateserver)
-	err = r.Client.Create(ctx, rolebinding)
-	if err != nil {
-		r.Log.Info("Failed to create rolebinding.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RolebindingCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRolebinding",
 			Message:            fmt.Sprintf("%s", err),
 			LastTransitionTime: t,
 		}
@@ -270,8 +190,6 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 		return ctrl.Result{}, nil
 	}
-
-	// Create service and route
 
 	// Add finalizer for this CR
 	if !controllerutil.ContainsFinalizer(gateserver, gateserverFinalizer) {

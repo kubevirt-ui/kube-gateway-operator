@@ -3,8 +3,8 @@ module github.com/kubevirt-ui/kube-gateway-operator
 go 1.15
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-logr/logr v0.3.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
 	github.com/openshift/api v0.0.0-20210309190949-7d6cac66d2a4
