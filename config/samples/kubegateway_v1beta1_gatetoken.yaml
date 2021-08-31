@@ -7,4 +7,5 @@ spec:
   secret-name: gateserver-sample-jwt-secret
   urls:
   - /api/v1/*
+  - /apis/*
 

@@ -4,5 +4,4 @@ metadata:
   name: gateserver-sample
   namespace: kube-gateway
 spec:
-  admin-role: reader
   img: 'quay.io/kubevirt-ui/kube-gateway:latest'
