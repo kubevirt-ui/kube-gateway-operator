@@ -51,6 +51,9 @@ vm=testvm
 # Set the vm namespace (the virtual machine must be in the same namespace as the proxy)
 ns=gateway-example
 
+# Generate the vnc subresource path
+path=/apis/subresources.kubevirt.io/v1/namespaces/$ns/virtualmachineinstances/$vm/vnc
+
 # Get the admin user k8s bearer token, and the k8s API path,
 # We will use the k8s API and credentials to create the gatetoken resource
 # NOTE: users should know the admin token and k8s api host, the scripts here 
@@ -58,16 +61,14 @@ ns=gateway-example
 token=$(oc whoami -t)
 apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespaces/$ns/gatetokens
 
-# Generate a uniqe gatetoken name
-date=$(date "+%y%m%d%H%M")
-name=$vm-$date
 # Get the name of the secret holding the private key for signing the gatetoken
 # NOTE: users should know the secret name, the script here
 #       gets this value using oc command only for this example.
 secret_name=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
 
-# Generate the vnc subresource path
-path=/apis/subresources.kubevirt.io/v1/namespaces/$ns/virtualmachineinstances/$vm/vnc
+# Generate a uniqe gatetoken name
+date=$(date "+%y%m%d%H%M")
+name=$vm-$date
 
 # Create the gatetoken resource
 data="{\"apiVersion\":\"kubegateway.kubevirt.io/v1beta1\",\"kind\":\"GateToken\",\"metadata\":{\"name\":\"$name\",\"namespace\":\"$ns\"},\"spec\":{\"secret-name\":\"$secret_name\",\"urls\":[\"$path\"]}}"
