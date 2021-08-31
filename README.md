@@ -40,6 +40,8 @@ IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 
 ## Create GateServer and GateToken examples
 
+For more information about generating a token see the [token](/docs/token.md) doc.
+
 Example files:
 [gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
 [gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
