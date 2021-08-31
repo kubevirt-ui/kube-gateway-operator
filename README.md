@@ -42,10 +42,6 @@ IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 
 For more information about running the gateway proxy and generating a token see the [token](/docs/token.md) and [deploy](/docs/deploy.md#starting-a-gateway) docs.
 
-Example files:
-[gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
-[gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
-
 ```bash
 # Use the kube-gateway namespace
 oc create namespace kube-gateway
@@ -59,6 +55,9 @@ oc create -f config/samples/kubegateway_v1beta1_gatetoken.yaml
 # check the token
 oc get gatetoken gatetoken-sample -o yaml
 ```
+Example files:
+[gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
+[gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
 
 ## Building for local development
 
