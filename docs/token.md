@@ -92,6 +92,8 @@ Once a token resource is registered it will try to sign the token, get the sign 
 ```bash
 # Get the token resource
 curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $apipath/$name
+
+# Another way to get the gatetoke is using the oc command: oc get gatetoken $name -o json
 ```
 
 ## Use the token to access the resource
