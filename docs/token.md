@@ -60,13 +60,13 @@ apipath=$(oc whoami --show-server)/apis/kubegateway.kubevirt.io/v1beta1/namespac
 date=$(date "+%y%m%d%H%M")
 name=$vm-$date
 # Get the name of the secret holding the private key for signing the gatetoken
-secret=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
+secret_name=$(oc get secrets -n $ns -o name | grep jwt-secret | cut -d "/" -f2)
 
 # Generate the vnc subresource path
 path=/apis/subresources.kubevirt.io/v1/namespaces/$ns/virtualmachineinstances/$vm/vnc
 
 # Create the gatetoken resource
-data="{\"apiVersion\":\"kubegateway.kubevirt.io/v1beta1\",\"kind\":\"GateToken\",\"metadata\":{\"name\":\"$name\",\"namespace\":\"$ns\"},\"spec\":{\"secret-name\":\"$secret\",\"urls\":[\"$path\"]}}"
+data="{\"apiVersion\":\"kubegateway.kubevirt.io/v1beta1\",\"kind\":\"GateToken\",\"metadata\":{\"name\":\"$name\",\"namespace\":\"$ns\"},\"spec\":{\"secret-name\":\"$secret_name\",\"urls\":[\"$path\"]}}"
 
 # Call k8s API using admin credentials to create a new gatetoken
 curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" -H "Content-Type: application/json" --request POST --data $data $apipath
@@ -79,7 +79,7 @@ curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" -H "Cont
 #   name: $name
 #   namespace: $ns
 # spec:
-#   secret-name: $secret
+#   secret-name: $secret_name
 #   urls:
 #   - $path
 # EOF
