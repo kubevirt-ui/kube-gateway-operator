@@ -121,52 +121,9 @@ func (r *GateServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// Take time
 	t := metav1.Time{Time: time.Now()}
 
-	// Create the JWT secret
-	r.Log.Info("Create JWT secret.")
-	secret, _ := r.Secret(gateserver)
-	if err := r.Client.Create(ctx, secret); err != nil {
-		r.Log.Info("Failed to create service.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "SecretCreated",
-			Status:             "False",
-			Reason:             "FailedCreateSecret",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
-	}
-
 	ctr, err := r.CreateResources(ctx, gateserver)
 	if err != nil {
 		return ctr, nil
-	}
-
-	route, _ := r.Route(gateserver)
-	err = r.Client.Create(ctx, route)
-	if err != nil {
-		r.Log.Info("Failed to create route.", "err", err)
-
-		gateserver.Status.Phase = "Error"
-		condition := metav1.Condition{
-			Type:               "RouteCreated",
-			Status:             "False",
-			Reason:             "FailedCreateRoute",
-			Message:            fmt.Sprintf("%s", err),
-			LastTransitionTime: t,
-		}
-		gateserver.Status.Conditions = append(gateserver.Status.Conditions, condition)
-		if err := r.Status().Update(ctx, gateserver); err != nil {
-			r.Log.Info("Failed to update status", "err", err)
-		}
-
-		return ctrl.Result{}, nil
 	}
 
 	// Create the gate service
