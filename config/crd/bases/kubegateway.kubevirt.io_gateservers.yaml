@@ -38,7 +38,7 @@ spec:
             properties:
               admin-resources:
                 default: ""
-                description: admin-resources is a comma seperated list of resources
+                description: admin-resources is a comma separated list of resources
                   athorization role of the service if left empty service could access
                   any resource. Defalut value is "".
                 maxLength: 1024

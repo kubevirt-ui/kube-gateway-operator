@@ -67,11 +67,15 @@ uninstall: manifests kustomize
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 DEPLOY_DIR=$(shell pwd)/deploy
-deploy: manifests kustomize
+deploy: deploy-dir
+	kubectl apply -f ${DEPLOY_DIR}/kube-gateway-operator.yaml
+
+# Create the deployment file
+DEPLOY_DIR=$(shell pwd)/deploy
+deploy-dir: manifests kustomize
 	-mkdir ${DEPLOY_DIR}
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > ${DEPLOY_DIR}/kube-gateway-operator.yaml
-	kubectl apply -f ${DEPLOY_DIR}/kube-gateway-operator.yaml
 
 # UnDeploy controller from the configured Kubernetes cluster in ~/.kube/config
 undeploy:
