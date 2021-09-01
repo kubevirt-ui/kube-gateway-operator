@@ -5,9 +5,9 @@
 
 ![alt gopher network](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/docs/network-side.png)
 
-kube-gateway-operator installs and operate [kube-gateway](https://github.com/kubevirt-ui/kube-gateway), kube-gateway allow access k8s API using time limited access tokens, kube-gateway allow usage of one time access tokens to k8s resources.
+The kube-gateway-operator installs and operates the [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) service, which allows access to the k8s API using time-limited access tokens and usage of one-time access tokens to access k8s resources.
 
-The operator manges service accounts, permisions, secrets needed for operatin of [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) and JWT token generation for one time k8s API access.
+The operator manages service accounts, permissions, and secrets needed for the operation of the [kube-gateway](https://github.com/kubevirt-ui/kube-gateway) service and JWT token generation used for one-time k8s API access.
 
 ## Build and push images
 
@@ -22,18 +22,17 @@ IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make podman-push
 For more information about deployment options see the [deploy](/docs/deploy.md) doc.
 
 ```bash
-# Deploy the operator, RBAC roles and CRDs
+# Deploy the operator, RBAC roles, and CRDs
 export USERNAME=yaacov
 IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make deploy
 
-# Deploy from an example deployment yaml
-# Will use pre-defined images and permistions, users can also copy this file to local
-# directory and edit the container image used.
+# Deploy from an example deployment yaml. Will use pre-defined images and permissions. 
+# Users can also copy this file to a local directory and edit the container image used.
 oc create -f https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/deploy/kube-gateway-operator.yaml
 ```
 
 ```bash
-# Remove deployment of the operator, RBAC roles and CRDs
+# Remove deployment of the operator, RBAC roles, and CRDs
 export USERNAME=yaacov
 IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 ```
@@ -48,13 +47,13 @@ For more information about running the gateway proxy and generating a token see 
 # Use the kube-gateway namespace
 oc create namespace kube-gateway
 
-# create a sample gateway server
+# Create a sample gateway server
 oc create -f config/samples/kubegateway_v1beta1_gateserver.yaml
 
-# create a sample token request
+# Create a sample token request
 oc create -f config/samples/kubegateway_v1beta1_gatetoken.yaml
 
-# check the token
+# Check the token
 oc get gatetoken gatetoken-sample -o yaml
 ```
 Example files:
@@ -66,10 +65,10 @@ Example files:
 ## Building for local development
 
 ```bash
-# Compile operator
+# Compile the operator
 make
 
-# Install CRD on cluser for running loaclly
+# Install CRDs on the cluster for running locally
 make install
 # make uninstall
 
