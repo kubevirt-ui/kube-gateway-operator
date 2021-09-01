@@ -38,6 +38,8 @@ export USERNAME=yaacov
 IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 ```
 
+![alt install operator](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/docs/install-operator.gif)
+
 ## Create GateServer and GateToken examples
 
 For more information about running the gateway proxy and generating a token see the [token](/docs/token.md) and [deploy](/docs/deploy.md#starting-a-gateway) docs.
@@ -58,6 +60,8 @@ oc get gatetoken gatetoken-sample -o yaml
 Example files:
 [gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
 [gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
+
+![alt create signed link](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/docs/create-signed-link.gif)
 
 ## Building for local development
 
