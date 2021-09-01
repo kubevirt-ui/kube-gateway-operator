@@ -3,7 +3,7 @@
 
 # kube-gateway-operator
 
-![alt gopher network](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/docs/network-side.png)
+![alt gopher network](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/docs/network-side.png)
 
 kube-gateway-operator installs and operate [kube-gateway](https://github.com/kubevirt-ui/kube-gateway), kube-gateway allow access k8s API using time limited access tokens, kube-gateway allow usage of one time access tokens to k8s resources.
 
@@ -38,7 +38,7 @@ export USERNAME=yaacov
 IMG=quay.io/$USERNAME/kube-gateway-operator:v0.0.1 make undeploy
 ```
 
-![alt install operator](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/docs/install-operator.gif)
+![alt install operator](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/docs/install-operator.gif)
 
 ## Create GateServer and GateToken examples
 
@@ -61,7 +61,7 @@ Example files:
 [gateserver.yaml](/config/samples/kubegateway_v1beta1_gateserver.yaml),
 [gatetoken.yaml](/config/samples/kubegateway_v1beta1_gatetoken.yaml)
 
-![alt create signed link](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway/main/docs/create-signed-link.gif)
+![alt create signed link](https://raw.githubusercontent.com/kubevirt-ui/kube-gateway-operator/main/docs/create-signed-link.gif)
 
 ## Building for local development
 
