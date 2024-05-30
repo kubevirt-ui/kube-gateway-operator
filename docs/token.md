@@ -115,7 +115,7 @@ jwt=$(curl -k -H 'Accept: application/json' -H "Authorization: Bearer $token" $a
 proxyurl=https://$(oc get gateserver -o json | jq -r .items[0].spec.route)
 
 # The link is signed using ${jwt} and will access the k8s API at ${path}.
-signed_link="${proxyurl}/auth/jwt/set?token=${jwt}&then=/noVNC/vnc_lite.html?path=k8s${path}"
+signed_link="${proxyurl}/auth/jwt/set?token=${jwt}&name=${vm}&namespace=${ns}"
 
 # Users holding the signed link will be able to use it for 1 hour.
 
